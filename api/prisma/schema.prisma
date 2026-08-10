@@ -15,6 +15,7 @@ model Account {
   email        String    @unique
   passwordHash String
   name         String?
+  isAdmin      Boolean   @default(false)
   createdAt    DateTime  @default(now())
   licenses     License[]
 }
@@ -22,6 +23,8 @@ model Account {
 // One row per desktop Pro Max purchase attempt. Created in "pending" state
 // when a Razorpay invoice is issued, flipped to "active" by the webhook once
 // payment is confirmed. The key itself is only meaningful once active.
+// amountPaise/currency are captured at invoice-creation time so revenue
+// reporting is a local query, not a live Razorpay API call per report.
 model License {
   id                 String    @id @default(cuid())
   key                String    @unique
@@ -29,6 +32,8 @@ model License {
   account            Account   @relation(fields: [accountId], references: [id])
   status             String    @default("pending") // pending | active | revoked
   razorpayInvoiceId  String?   @unique
+  amountPaise        Int?
+  currency           String    @default("INR")
   activatedAt        DateTime?
   lastValidatedAt    DateTime?
   createdAt          DateTime  @default(now())

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcomLens Pro Max | Admin</title>
+<style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, Segoe UI, sans-serif; margin: 0; background: #F2EAD9; color: #0D0D0D; }
+    header { background: #16233A; color: #FFFDF7; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 18px; margin: 0; }
+    header button { background: transparent; border: 1px solid #7A756A; color: #FFFDF7; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+    #loginView { max-width: 360px; margin: 80px auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    #loginView input { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; }
+    #loginView button { width: 100%; padding: 10px; background: #F5C518; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .error { color: #b3261e; font-size: 13px; margin-bottom: 8px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .card { background: #fff; padding: 16px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .card .label { font-size: 12px; color: #7A756A; text-transform: uppercase; }
+    .card .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+    section { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    section h2 { font-size: 15px; margin: 0 0 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
+    th { color: #7A756A; font-weight: 600; }
+    .badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge.active { background: #dff6e0; color: #1a7f37; }
+    .badge.pending { background: #fff3d6; color: #9a6700; }
+    .badge.revoked { background: #fde2e1; color: #b3261e; }
+    .resend-btn { background: #2B4570; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .resend-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div id="loginView">
+    <h2>EcomLens Pro Max Admin</h2>
+    <p id="loginError" class="error hidden"></p>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button id="loginBtn">Log in</button>
+</div>
+
+<div id="dashboardView" class="hidden">
+    <header>
+        <h1>EcomLens Pro Max Admin</h1>
+        <button id="logoutBtn">Log out</button>
+    </header>
+    <main>
+        <div class="cards" id="summaryCards"></div>
+
+        <section>
+            <h2>Revenue by customer</h2>
+            <table>
+                <thead><tr><th>Customer</th><th>Email</th><th>Licenses</th><th>Revenue</th></tr></thead>
+                <tbody id="byCustomerBody"></tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Revenue by day</h2>
+            <table>
+                <thead><tr><th>Day</th><th>Revenue</th></tr></thead>
+                <tbody id="byDayBody"></tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Invoices</h2>
+            <table>
+                <thead><tr><th>Customer</th><th>Status</th><th>Amount</th><th>Created</th><th>Activated</th><th></th></tr></thead>
+                <tbody id="invoicesBody"></tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<script>
+const API_BASE = window.location.origin;
+
+function formatMoney(paise, currency) {
+    if (paise == null) return "-";
+    return `${currency || "INR"} ${(paise / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+}
+
+function getToken() { return localStorage.getItem("adminToken"); }
+
+async function apiGet(path) {
+    const res = await fetch(`${API_BASE}${path}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if (res.status === 401 || res.status === 403) { showLogin(); throw new Error("Unauthorized"); }
+    return res.json();
+}
+
+async function apiPost(path) {
+    const res = await fetch(`${API_BASE}${path}`, { method: "POST", headers: { Authorization: `Bearer ${getToken()}` } });
+    return res.json();
+}
+
+function showLogin() {
+    localStorage.removeItem("adminToken");
+    document.getElementById("dashboardView").classList.add("hidden");
+    document.getElementById("loginView").classList.remove("hidden");
+}
+
+function showDashboard() {
+    document.getElementById("loginView").classList.add("hidden");
+    document.getElementById("dashboardView").classList.remove("hidden");
+    loadAll();
+}
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const errorEl = document.getElementById("loginError");
+    errorEl.classList.add("hidden");
+
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+    const body = await res.json();
+
+    if (!body.status) {
+        errorEl.textContent = body.msg || "Login failed";
+        errorEl.classList.remove("hidden");
+        return;
+    }
+    if (!body.data.isAdmin) {
+        errorEl.textContent = "This account doesn't have admin access.";
+        errorEl.classList.remove("hidden");
+        return;
+    }
+
+    localStorage.setItem("adminToken", body.data.token);
+    showDashboard();
+});
+
+document.getElementById("logoutBtn").addEventListener("click", showLogin);
+
+async function loadSummary() {
+    const { data } = await apiGet("/api/admin/summary");
+    const cards = [
+        ["Total licenses issued", data.totalLicensesIssued],
+        ["Active licenses", data.totalActiveLicenses],
+        ["Total revenue", formatMoney(data.totalRevenuePaise, "INR")],
+        ["Total customers", data.totalCustomers],
+        ["Paying customers", data.payingCustomers],
+    ];
+    document.getElementById("summaryCards").innerHTML = cards.map(([label, value]) =>
+        `<div class="card"><div class="label">${label}</div><div class="value">${value}</div></div>`
+    ).join("");
+}
+
+async function loadByCustomer() {
+    const { data } = await apiGet("/api/admin/revenue/by-customer");
+    document.getElementById("byCustomerBody").innerHTML = data.map(row => `
+        <tr>
+            <td>${row.name || "-"}</td>
+            <td>${row.email}</td>
+            <td>${row.licenseCount}</td>
+            <td>${formatMoney(row.revenuePaise, "INR")}</td>
+        </tr>
+    `).join("") || `<tr><td colspan="4">No revenue yet.</td></tr>`;
+}
+
+async function loadByDay() {
+    const { data } = await apiGet("/api/admin/revenue/by-day");
+    document.getElementById("byDayBody").innerHTML = data.map(row => `
+        <tr><td>${row.day}</td><td>${formatMoney(row.revenuePaise, "INR")}</td></tr>
+    `).join("") || `<tr><td colspan="2">No revenue yet.</td></tr>`;
+}
+
+async function loadInvoices() {
+    const { data } = await apiGet("/api/admin/invoices");
+    document.getElementById("invoicesBody").innerHTML = data.map(inv => `
+        <tr>
+            <td>${inv.customerName || inv.customerEmail}</td>
+            <td><span class="badge ${inv.status}">${inv.status}</span></td>
+            <td>${formatMoney(inv.amountPaise, inv.currency)}</td>
+            <td>${new Date(inv.createdAt).toLocaleDateString()}</td>
+            <td>${inv.activatedAt ? new Date(inv.activatedAt).toLocaleDateString() : "-"}</td>
+            <td>
+                <button class="resend-btn" data-id="${inv.id}" ${!inv.razorpayInvoiceId ? "disabled" : ""}>
+                    Resend
+                </button>
+            </td>
+        </tr>
+    `).join("") || `<tr><td colspan="6">No invoices yet.</td></tr>`;
+
+    document.querySelectorAll(".resend-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            btn.textContent = "Sending...";
+            const result = await apiPost(`/api/admin/invoices/${btn.dataset.id}/resend`);
+            btn.textContent = result.status ? "Sent" : "Failed";
+            if (result.status) setTimeout(() => { btn.textContent = "Resend"; btn.disabled = false; }, 2000);
+            else btn.disabled = false;
+        });
+    });
+}
+
+function loadAll() {
+    loadSummary();
+    loadByCustomer();
+    loadByDay();
+    loadInvoices();
+}
+
+if (getToken()) {
+    showDashboard();
+} else {
+    showLogin();
+}
+</script>
+</body>
+</html>

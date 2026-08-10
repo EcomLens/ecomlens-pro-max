@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
 const { hashPassword, verifyPassword } = require("../lib/passwords");
+const { signSessionToken } = require("../lib/jwt");
 
 const router = express.Router();
 
@@ -33,7 +34,16 @@ router.post("/login", async (req, res) => {
         return res.status(401).json({ status: false, msg: "Invalid email or password" });
     }
 
-    return res.json({ status: true, data: { id: account.id, email: account.email, name: account.name } });
+    return res.json({
+        status: true,
+        data: {
+            id: account.id,
+            email: account.email,
+            name: account.name,
+            isAdmin: account.isAdmin,
+            token: signSessionToken(account),
+        },
+    });
 });
 
 module.exports = router;

@@ -51,7 +51,7 @@ router.post("/purchase", async (req, res) => {
 
         await prisma.license.update({
             where: { id: license.id },
-            data: { razorpayInvoiceId: invoice.id },
+            data: { razorpayInvoiceId: invoice.id, amountPaise: priceInPaise, currency: "INR" },
         });
 
         return res.json({
