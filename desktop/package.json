@@ -1,0 +1,28 @@
+{
+  "name": "ecomlens",
+  "version": "2.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx electron .",
+    "build:css": "npx @tailwindcss/cli -i ./src/styles/style.css -o ./src/styles/tailwind.css --watch",
+    "build": "electron-builder --win --x64",
+    "rebuild": "npx electron-rebuild",
+    "postinstall": "npx electron-rebuild --only better-sqlite3"
+  },
+  "author": "Jinzy",
+  "license": "UNLICENSED",
+  "description": "EcomLens Pro Max by Jinzy",
+  "devDependencies": {
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12",
+    "electron-rebuild": "^3.2.9"
+  },
+  "dependencies": {
+    "@fontsource/fraunces": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@tailwindcss/cli": "^4.1.12",
+    "better-sqlite3": "^12.2.0",
+    "tailwindcss": "^4.1.12"
+  }
+}

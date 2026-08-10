@@ -1,0 +1,115 @@
+/* 
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+} */
+
+#blink-svg.recording {
+    animation : pulse 1.2s ease-in-out infinite;
+
+}
+
+
+
+@keyframes pulse{
+    0% {
+        transform : scale(1);
+    }
+    50% {
+        transform : scale(1.15);
+    }
+    100% {
+        transform : scale(1);
+    }
+}
+
+/* ---- EcomLens motion system ---- */
+
+@keyframes ecom-fade-slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.ecom-entrance {
+    animation: ecom-fade-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ecom-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.ecom-fade-in {
+    animation: ecom-fade-in 0.3s ease-out both;
+}
+
+.ecom-exiting {
+    opacity: 0 !important;
+    transform: scale(0.97);
+    transition: opacity 0.25s ease-in, transform 0.25s ease-in;
+    pointer-events: none;
+}
+
+.ecom-view-fade {
+    transition: opacity 0.15s ease;
+}
+.ecom-view-fade.ecom-view-hidden {
+    opacity: 0;
+}
+
+@keyframes ecom-spin {
+    to { transform: rotate(360deg); }
+}
+.ecom-spinner {
+    display: inline-block;
+    width: 0.9em;
+    height: 0.9em;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: ecom-spin 0.6s linear infinite;
+    vertical-align: -0.15em;
+}
+
+@keyframes ecom-scan-flash {
+    0%   { background-color: #bbf7d0; border-color: #22c55e; }
+    100% { background-color: #d1d5db; border-color: #1f2937; }
+}
+.ecom-scan-flash {
+    animation: ecom-scan-flash 0.6s ease-out;
+}
+
+/* Shining black/grey panel for logo placement - matches the logo images' own
+   pure-black (#000000) baked-in background so there's no visible seam. */
+.ecom-logo-panel {
+    background: radial-gradient(circle at 30% 20%, #2a2a2a 0%, #0D0D0D 65%);
+}
+
+#barcode-input.scanning{
+    outline-color: rgb(51, 240, 18);
+    border-color: #adebb3;
+    animation: scanAnimation 0.7s ease-in-out infinite ;
+    /* box-shadow: 0px 0px 10px 2px #adebb3; */
+}
+
+
+@keyframes scanAnimation {
+    0% {
+    box-shadow: 0px 0px 4px 1px #adebb3;
+        
+    }
+    25%{
+    box-shadow: 0px 0px 5px 2px #adebb3;
+        
+    }
+    50%{
+    box-shadow: 0px 0px 6px 2px #adebb3;
+        
+    }
+    75% {
+    box-shadow: 0px 0px 8px 2px #adebb3;
+        
+    }
+    100% {
+    box-shadow: 0px 0px 10px 2px #adebb3;
+    }
+}

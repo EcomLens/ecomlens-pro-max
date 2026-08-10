@@ -1,0 +1,134 @@
+
+<div id="settings" class="w-full h-full flex flex-col px-4 py-4 space-y-6 bg-white overflow-y-auto ecom-fade-in">
+    <div class="heading font-display font-semibold text-xl text-ink">
+        Settings
+    </div>
+
+    <div class="space-y-2">
+        <h3 class="font-semibold text-ink">Account</h3>
+        <p class="text-sm text-text-body">Logged in as: <span id="settings-username" class="font-medium text-ink">-</span></p>
+        <p class="text-sm text-text-body">App version: <span id="settings-app-version" class="font-mono font-medium text-ink">-</span></p>
+    </div>
+
+    <hr class="border-cream-dark"/>
+
+    <div class="space-y-2">
+        <h3 class="font-semibold text-ink">Recording Storage Location</h3>
+        <div class="flex items-center gap-2 flex-wrap">
+            <code id="settings-video-dir" class="font-mono bg-cream-dark px-2 py-1 rounded text-sm text-text-body max-w-md truncate">Loading...</code>
+            <button id="settings-change-dir-btn" class="border border-navy text-navy px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-navy hover:text-white transition-colors duration-200">Change</button>
+            <button id="settings-reset-dir-btn" class="text-text-dim text-sm hover:underline cursor-pointer transition-colors duration-200">Reset to Default</button>
+        </div>
+    </div>
+
+    <hr class="border-cream-dark"/>
+
+    <div class="space-y-2">
+        <h3 class="font-semibold text-ink">Camera</h3>
+        <select id="settings-camera-select" class="border border-cream-dark rounded-md px-3 py-2 text-sm w-full max-w-md cursor-pointer text-text-body">
+            <option value="">Loading cameras...</option>
+        </select>
+        <p class="text-xs text-text-dim">Changes take effect next time you open the Dashboard tab.</p>
+    </div>
+
+    <hr class="border-cream-dark"/>
+
+    <div class="space-y-2 max-w-2xl">
+        <h3 class="font-display font-semibold text-ink">EcomLens — Proprietary Software Notice</h3>
+        <p class="text-sm text-text-body">EcomLens is proprietary software developed and owned by Jinzy, a brand of Net Brands Solutions.</p>
+        <p class="text-sm text-text-body">EcomLens is designed for authorized ecommerce warehouse and product-recording use and operates locally on the user's computer. The application does not transmit or store product recordings or customer information on Jinzy / Net Brands Solutions servers.</p>
+        <p class="text-sm text-text-body">The software and its underlying technology, design and intellectual property remain the property of Jinzy / Net Brands Solutions.</p>
+        <p class="text-sm text-text-body">Unauthorized copying, modification, reverse engineering, sharing, redistribution, republishing or commercial exploitation is strictly prohibited and may result in legal action under applicable law.</p>
+        <p class="text-xs text-text-dim">© 2026 Jinzy / Net Brands Solutions. All Rights Reserved.</p>
+        <button id="terms-open-btn" class="text-navy text-sm font-semibold hover:underline cursor-pointer transition-colors duration-200">Terms &amp; License &rsaquo;</button>
+    </div>
+</div>
+
+<!-- Terms & License Modal -->
+<div id="terms-modal" class="hidden fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[14px] shadow-lg w-full max-w-2xl max-h-[85vh] flex flex-col ecom-fade-in">
+        <div class="flex items-center justify-between p-6 pb-4 border-b border-cream-dark shrink-0">
+            <h2 class="font-display text-xl font-semibold text-ink">EcomLens — Terms &amp; License</h2>
+            <button id="terms-modal-close" class="text-text-dim hover:text-ink cursor-pointer text-2xl leading-none">&times;</button>
+        </div>
+        <div class="overflow-y-auto p-6 pt-4 space-y-4 text-sm text-text-body">
+            <p class="text-xs text-text-dim">Effective Date: 10/08/2026</p>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">1. Ownership</h3>
+                <p>EcomLens is proprietary software developed and owned by Jinzy, a brand of Net Brands Solutions ("Company"). All rights, title and interest in EcomLens, including its software, source code, object code, user interface, design, features, functionality, workflows, graphics, documentation, branding and associated intellectual property, remain the exclusive property of Jinzy / Net Brands Solutions.</p>
+                <p>EcomLens is licensed, not sold. Installation or use of the application does not transfer ownership or intellectual property rights to the user.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">2. Permitted Use</h3>
+                <p>EcomLens is provided for authorized end-user use, primarily for ecommerce warehouse product recording and related product-content activities. The user is granted a limited, non-exclusive, non-transferable and non-sublicensable right to use the application for its intended purpose.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">3. Offline Operation &amp; Privacy</h3>
+                <p>EcomLens is a standalone desktop application designed to operate without an internet connection. The application does not transmit product photographs, videos or recordings to Jinzy / Net Brands Solutions servers.</p>
+                <p>Jinzy / Net Brands Solutions does not intentionally collect, capture, upload, transmit or store customer personal information through EcomLens.</p>
+                <p>Product photographs, videos and other files created using EcomLens are stored locally on the user's computer or other storage location selected by the user. Jinzy / Net Brands Solutions does not have access to or control over files stored locally by the user.</p>
+                <p>The user is responsible for the security, backup and lawful use of all files created or stored using EcomLens.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">4. Customer Data</h3>
+                <p>EcomLens is not designed to collect or maintain customer personal information, including customer names, phone numbers, email addresses, addresses, payment information or other personally identifiable information.</p>
+                <p>Users are responsible for ensuring that any information they choose to enter, record or process using the application is handled in accordance with applicable laws and privacy requirements.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">5. Restrictions</h3>
+                <p>Without prior written authorization from Jinzy / Net Brands Solutions, the user shall not:</p>
+                <ul class="list-disc pl-5 space-y-0.5">
+                    <li>Copy or reproduce EcomLens or any substantial portion of it.</li>
+                    <li>Share, distribute, upload or republish the software.</li>
+                    <li>Sell, resell, rent, lease or sublicense the software.</li>
+                    <li>Modify, alter or create derivative works from the software.</li>
+                    <li>Reverse engineer, decompile or disassemble the software.</li>
+                    <li>Attempt to extract or derive its source code.</li>
+                    <li>Remove copyright, trademark or proprietary notices.</li>
+                    <li>Circumvent technical or security protections.</li>
+                    <li>Make unauthorized copies available to third parties.</li>
+                    <li>Commercially exploit or redistribute the software without authorization.</li>
+                </ul>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">6. Unauthorized Use</h3>
+                <p>Unauthorized copying, modification, reverse engineering, distribution, sharing, republishing, resale, sublicensing or other misuse of EcomLens constitutes a violation of this Agreement and the intellectual property rights of Jinzy / Net Brands Solutions. Such activity may result in termination of the user's license and may lead to legal action and/or other remedies available under applicable law.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">7. User Content</h3>
+                <p>The user remains responsible for all product images, videos, recordings and other content created or processed using EcomLens. Jinzy / Net Brands Solutions does not claim ownership of the user's original content merely because it was created using EcomLens.</p>
+                <p>The user is responsible for ensuring that such content does not infringe the intellectual property, privacy or other rights of any third party.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">8. Device &amp; Data Security</h3>
+                <p>EcomLens operates locally on the user's computer. The user is responsible for maintaining the security of their computer, operating system, files and locally stored recordings. Users should maintain appropriate backups of important product recordings and other files.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">9. Termination</h3>
+                <p>Jinzy / Net Brands Solutions reserves the right to terminate a user's license if the user violates these Terms or uses EcomLens in an unauthorized manner. Upon termination, the user must cease using the software and remove unauthorized copies or installations under their control.</p>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-semibold text-ink">10. Acceptance</h3>
+                <p>By installing or using EcomLens, you acknowledge that you have read, understood and agreed to these Terms &amp; License. If you do not agree with these terms, you must not install or use EcomLens.</p>
+            </div>
+
+            <div class="pt-4 border-t border-cream-dark space-y-0.5">
+                <p class="font-display font-semibold text-ink">EcomLens</p>
+                <p class="text-xs text-text-dim">Developed &amp; Owned by Jinzy</p>
+                <p class="text-xs text-text-dim">A Brand of Net Brands Solutions</p>
+                <p class="text-xs text-text-dim">© 2026 Jinzy / Net Brands Solutions. All Rights Reserved.</p>
+                <p class="text-xs text-text-dim">Unauthorized copying, modification, reverse engineering, sharing, redistribution, republishing or commercial exploitation is strictly prohibited.</p>
+            </div>
+        </div>
+    </div>
+</div>

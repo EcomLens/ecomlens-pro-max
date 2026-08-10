@@ -1,0 +1,90 @@
+
+<div id="record-scan" class="h-full flex w-full items-start justify-center bg-white px-4">
+    <div class="scan-view w-3/5 flex flex-col pt-4">
+        <div id="user-greeting" class="hidden mb-3">
+            <p class="font-display text-3xl font-semibold text-ink">Hello, <span id="greeting-name" class="text-navy">there</span><span class="text-gold">.</span></p>
+        </div>
+        <div id="connection-status" class="mb-3 rounded-[14px] border border-cream-dark bg-cream-dark/50 p-3 flex flex-col gap-2 ecom-fade-in">
+            <div class="flex items-center gap-4 text-sm">
+                <span class="flex items-center gap-1.5 text-text-dim">
+                    <span id="camera-status-dot" class="h-2 w-2 rounded-full bg-text-dim shrink-0"></span>
+                    <span id="camera-status-text">Camera: Checking...</span>
+                </span>
+                <span class="flex items-center gap-1.5 text-text-dim">
+                    <span id="scanner-status-dot" class="h-2 w-2 rounded-full bg-text-dim shrink-0"></span>
+                    <span id="scanner-status-text">Scanner: Not confirmed</span>
+                </span>
+            </div>
+            <div id="scanner-test-prompt" class="flex flex-col items-start gap-2">
+                <p class="text-xs text-text-dim">Scan this barcode with your scanner to confirm it's connected:</p>
+                <img src="../assets/test-barcode.png" alt="Test barcode" class="w-72 max-w-full h-auto bg-white rounded p-2 border border-cream-dark" />
+            </div>
+            <div id="connection-passed-banner" class="hidden items-center gap-2 text-navy font-semibold text-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 shrink-0">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="m8.5 12.5 2.5 2.5 5-5"/>
+                </svg>
+                <span id="connection-passed-msg">Connection Passed &mdash; Start scanning now</span>
+            </div>
+        </div>
+        <div class="camera flex p-2 relative">
+            <div id="package-image" class="rounded-[14px] bg-cream-dark w-full h-64 flex flex-col items-center justify-center gap-3">
+                <div class="flex items-center gap-5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-14 w-14 text-navy">
+                        <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 text-gold-deep">
+                        <circle cx="9" cy="21" r="1"/>
+                        <circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                </div>
+                <p class="text-text-dim text-sm">Waiting for camera&hellip;</p>
+            </div>
+            <video id="video" class="hidden w-full h-auto rounded-[14px]" autoplay muted></video>
+            <div id="blink-wrapper" class="hidden absolute top-[15px] left-[15px] justify-center items-center">
+                <svg id="blink-svg" width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle id="blink-outer-circle" cx="50" cy="50" r="35" fill="#7A756A" />
+                    <circle cx="50" cy="50" r="12" fill="white" />
+                </svg>
+                <span id="timer" class="font-mono font-bold text-2xl text-[#e06155]"></span>
+
+            </div>
+        </div>
+        <div id="barcode-view" class="border-[2px] border-navy/30 border-dashed mt-4 rounded-[14px] flex flex-col items-center justify-center h-32 bg-white gap-2">
+            <input id="barcode-input" class="barcode-input font-mono text-xl font-semibold w-full max-w-[27em] h-10 outline-navy border-[2px] border-navy border-dashed rounded-sm text-center bg-cream-dark" type="text" name="barcode" placeholder=""/>
+            <span id="scan-info" class="text-text-dim">Click inside the above input box to scan barcode & recording</span>
+        </div>
+        <div class="controls flex items-center justify-between mt-2">
+            <div class="multimedia flex gap-4 justify-center items-center">
+                <span class="font-mono text-xl mr-1 font-semibold text-navy border-1 rounded-md border-navy py-1 px-2">MP4</span>
+
+                <button id="stop-recording-btn" class="rounded-full cursor-pointer hover:bg-navy-dark/10">
+                    <img class="rounded-full h-11 hover:opacity-85"  src="../assets/pause-btn.jpeg" alt="pause-btn">
+                </button>
+            </div>
+
+            <div class="finalize-controls flex gap-4 items-center">
+                <p class="text-text-body">Click here after your last recording is completed &gt&gt&gt </p>
+                <button id="last-pkg-btn" disabled class="h-9 w-9 rounded-full bg-text-dim cursor-not-allowed"></button>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="recent-record-view w-2/5 bg-navy-dark flex flex-col h-full ml-4 my-4 rounded-[14px] p-4">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+                <h2 class="font-display text-xl font-semibold text-white">Recent Records</h2>
+                <span id="today-count-badge" class="text-xs font-semibold text-gold bg-white/10 rounded-full px-2 py-0.5">Today: 0</span>
+            </div>
+            <button id="view-library-btn" class="text-gold text-xs font-semibold hover:underline cursor-pointer transition-colors duration-200">View All &rsaquo;</button>
+        </div>
+        <div id="recent-records-list" class="flex-1 overflow-y-auto space-y-1">
+            <p class="text-sm text-white/60 px-1">Loading&hellip;</p>
+        </div>
+    </div>
+</div>
+

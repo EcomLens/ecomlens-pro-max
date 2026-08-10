@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcomLens | Login</title>
+  <link href="../styles/tailwind.css" rel="stylesheet">
+  <link href="../styles/styles.css" rel="stylesheet">
+  <script type="module" src="../renderer/index.renderer.js"></script>
+  <link rel="stylesheet" href="../styles/toastify.min.css">
+  <script src="../utils/toastify.min.js"></script>
+</head>
+<body class="min-h-screen h-screen flex items-center justify-center bg-cream overflow-y-auto p-4">
+
+  <div id="auth-card" class="ecom-entrance flex flex-col md:flex-row bg-white rounded-[14px] shadow-lg overflow-hidden w-full max-w-[900px] my-4">
+    <!-- Left side (Logo) -->
+    <div class="ecom-logo-panel w-full md:w-1/2 flex items-center justify-center p-6">
+      <div class="text-center w-full">
+        <img src="../assets/ecomlense.jpeg" alt="EcomLens Logo" class="mx-auto object-contain max-w-full max-h-[160px] md:max-h-none" />
+      </div>
+    </div>
+
+    <!-- Right side (Login Form) -->
+    <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+
+      <!-- Activation Panel (shown until this installation has a valid license) -->
+      <div id="activationPanel" class="hidden space-y-4 ecom-fade-in">
+        <h2 class="font-display text-xl font-semibold text-ink">Activate EcomLens Pro Max</h2>
+        <p class="text-sm text-text-dim">Enter the license key you received after purchase to activate this installation. Requires an internet connection the first time - after that, EcomLens works offline.</p>
+        <input id="activation-key" type="text" placeholder="PROMAX-XXXX-XXXX-XXXX-XXXX" class="w-full px-4 py-2 border border-cream-dark rounded-lg font-mono uppercase transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-navy/40 focus:border-navy" />
+        <button id="activate-btn" class="w-full bg-gold text-ink font-semibold py-2 rounded-lg hover:bg-gold-deep transition-all duration-150 active:scale-[0.97]" type="button">Activate</button>
+        <p class="text-sm text-text-dim text-center">Don't have a license? <a href="#" id="activationBuyLink" class="text-navy hover:underline">Buy EcomLens Pro Max</a></p>
+      </div>
+
+      <!-- Auth Panel (shown once activated) -->
+      <div id="authPanel" class="hidden">
+        <!-- Tabs -->
+        <div class="flex space-x-6 mb-6 border-b border-cream-dark">
+          <button id="loginTab" class="pb-2 border-b-2 border-gold text-ink font-bold transition-colors duration-200">Login</button>
+          <button id="signupTab" class="pb-2 text-text-dim hover:text-navy transition-colors duration-200">Signup</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-4 ecom-fade-in">
+          <input id="login-username" type="email" placeholder="Email Address" class="w-full px-4 py-2 border border-cream-dark rounded-lg transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-navy/40 focus:border-navy" />
+          <input id="login-password" type="password" placeholder="Password" class="w-full px-4 py-2 border border-cream-dark rounded-lg transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-navy/40 focus:border-navy" />
+          <a href="#" class="text-sm text-navy hover:underline">Forgot password?</a>
+          <button id="login-btn" class="w-full bg-gold text-ink font-semibold py-2 rounded-lg hover:bg-gold-deep transition-all duration-150 active:scale-[0.97]" type="button">Login</button>
+          <p class="text-sm text-text-dim text-center">Not a member? <a href="#" id="backToSignup" class="text-navy hover:underline">Signup now</a></p>
+        </form>
+
+        <!-- Signup Form (hidden initially) -->
+        <form id="signupForm" class="space-y-4 hidden">
+          <input id="signup-first-name" type="text" placeholder="First Name" class="w-full px-4 py-2 border border-cream-dark rounded-lg transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-navy/40 focus:border-navy" />
+          <input id="signup-username" type="email" placeholder="Email Address" class="w-full px-4 py-2 border border-cream-dark rounded-lg transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-navy/40 focus:border-navy" />
+          <input id="signup-password" type="password" placeholder="Password" class="w-full px-4 py-2 border border-cream-dark rounded-lg transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-navy/40 focus:border-navy" />
+          <button id="signup-btn" class="w-full bg-gold text-ink font-semibold py-2 rounded-lg hover:bg-gold-deep transition-all duration-150 active:scale-[0.97]" type="button">Signup</button>
+          <p class="text-sm text-text-dim text-center">Already have an account? <a href="#" id="backToLogin" class="text-navy hover:underline">Login</a></p>
+        </form>
+      </div>
+
+      <!-- Footer tagline -->
+      <p class="font-display italic text-sm text-text-dim text-center mt-6">
+        Catch the Leaks with EcomLens, Before they Cost You!
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcomLens | Dashboard</title>
+    <link href="../styles/tailwind.css" rel="stylesheet">
+    <link href="../styles/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/toastify.min.css">
+    <script type="module" src="../renderer/dashboard.renderer.js"></script>
+    <script src="../utils/toastify.min.js"></script>
+
+</head>
+<body class="ecom-entrance h-screen flex flex-col w-full items-start justify-between bg-cream">
+    <header id="header" class="header ecom-logo-panel w-full flex items-center justify-between px-8 py-3">
+        <div class="header-logo">
+            <img  class="h-10" src="../assets/ecomlense-logo.jpeg" alt="ecomlens">
+        </div>
+        <div class="header-menu flex items-center gap-8" >
+            <button id="new-recordings-btn" class="text-white text-sm font-medium cursor-pointer hover:text-gold transition-colors duration-200">New Recordings</button>
+            <button id="logout-btn" class="text-white text-sm font-medium cursor-pointer hover:text-gold transition-colors duration-200">Logout</button>
+            <button id="help-btn" class="text-white text-sm font-medium cursor-pointer hover:text-gold transition-colors duration-200">Help</button>
+            <button id="exit-btn" class="text-white text-sm font-medium cursor-pointer hover:text-gold transition-colors duration-200">Exit</button>
+        </div>
+    </header>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="hidden fixed inset-0 bg-ink/50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-[14px] shadow-lg w-full max-w-md mx-4 p-6 space-y-4 ecom-fade-in">
+            <div class="flex items-center justify-between">
+                <h2 class="font-display text-xl font-semibold text-ink">Help &amp; Support</h2>
+                <button id="help-modal-close" class="text-text-dim hover:text-ink cursor-pointer text-2xl leading-none">&times;</button>
+            </div>
+            <button id="help-watch-tutorial-btn" class="w-full bg-gold text-ink font-semibold py-2 rounded-lg hover:bg-gold-deep transition-all duration-150 active:scale-[0.97] cursor-pointer">
+                Watch Tutorial
+            </button>
+            <div class="text-sm text-text-body border-t border-cream-dark pt-4 space-y-1">
+                <p class="font-semibold text-ink">Need more help?</p>
+                <p>Email us at <a id="help-email-link" href="mailto:support@ecomlens.jinzy.com" class="text-navy hover:underline">support@ecomlens.jinzy.com</a></p>
+                <p class="text-text-dim">Response time: 24-48 working hours (Mon-Sat, 9 AM - 6 PM)</p>
+            </div>
+        </div>
+    </div>
+    <!--switch will change content in this view by default reccord page shown-->
+    <main class="main flex w-full h-full">
+        <!-- tab navigation menu -->
+        <div class="tab-nav-menu h-full w-56 bg-cream flex flex-col justify-between px-3 shrink-0">
+            <div class="nav-menu pt-8 flex flex-col gap-2">
+                <button id="dashboard-btn" class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-semibold text-text-body hover:text-navy hover:bg-cream-dark transition-colors duration-200 cursor-pointer">
+                    <span class="flex items-center justify-center h-9 w-9 rounded-[11px] bg-navy text-gold shrink-0">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                        </svg>
+                    </span>
+                    <span>Dashboard</span>
+                </button>
+                <button id="recordings-library-btn" class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-semibold text-text-body hover:text-navy hover:bg-cream-dark transition-colors duration-200 cursor-pointer">
+                    <span class="flex items-center justify-center h-9 w-9 rounded-[11px] bg-navy text-gold shrink-0">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/>
+                        </svg>
+                    </span>
+                    <span>Recordings Library</span>
+                </button>
+                <button id="tutorials-btn" class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-semibold text-text-body hover:text-navy hover:bg-cream-dark transition-colors duration-200 cursor-pointer">
+                    <span class="flex items-center justify-center h-9 w-9 rounded-[11px] bg-navy text-gold shrink-0">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M10 8.5v7l6-3.5-6-3.5Z" fill="currentColor" stroke="none"/>
+                        </svg>
+                    </span>
+                    <span>Tutorials</span>
+                </button>
+            </div>
+            <div class="setup-menu pb-6 flex flex-col gap-2">
+                <button id="settings-btn" class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-semibold text-text-body hover:text-navy hover:bg-cream-dark transition-colors duration-200 cursor-pointer">
+                    <span class="flex items-center justify-center h-9 w-9 rounded-[11px] bg-navy text-gold shrink-0">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <circle cx="12" cy="12" r="3.2"/>
+                            <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4"/>
+                        </svg>
+                    </span>
+                    <span>Settings</span>
+                </button>
+                <div class="ecom-logo-panel rounded-[14px] p-3 flex items-center justify-center mt-2">
+                    <img class="w-full max-w-[7rem]" src="../assets/ecomlense.jpeg" alt="ecomlens">
+                </div>
+            </div>
+        </div>
+
+        <!-- view -->
+        <div id="view" class="view ecom-view-fade h-full bg-cream-dark w-7/8">
+            Dashboard
+        </div>
+    </main>   
+</body>
+</html>
