@@ -18,6 +18,8 @@ EcomLens Pro Max is the online-activated edition of EcomLens — a desktop appli
 - **Settings** – Configurable storage location, camera selection, and account info
 - **Tutorials** – Built-in walkthrough videos (English/Hindi)
 
+*Prefer no install? The same scan-triggered recording is also available as a pay-per-scan web app — see [`../api/README.md`](../api/README.md#-web-app--key-features-app).*
+
 ---
 
 ## 🚀 Getting Started

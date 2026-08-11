@@ -2,7 +2,22 @@
 
 Backend service for EcomLens Pro Max — accounts, desktop license activation, an admin dashboard, the web scanning app, and the public marketing site, all off one shared customer/account system.
 
-Part of the [ecomlens-pro-max](../) monorepo — see [`../desktop`](../desktop) for the desktop client this also serves.
+Part of the [ecomlens-pro-max](../) monorepo — see [`../desktop`](../desktop) for the desktop client this also serves. For architecture, the request/auth model, database schema, and known quirks, see [DEVELOPER.md](DEVELOPER.md).
+
+---
+
+## ✨ Web App — Key Features (`/app`)
+
+- **Login & Signup** — same accounts system as the desktop app; log in from any browser, no install
+- **Camera + Scanner Detection** — automatic connection status for both, same detection logic as the desktop app
+- **Barcode-Triggered Recording** — scanning a barcode starts recording automatically; scanning again stops it and starts the next
+- **Pay-Per-Scan Ready** — every recording's barcode + timestamp is logged to the account (video itself never leaves your machine), laying the groundwork for credit-based billing
+- **Works in Any Browser** — recordings save via a normal browser download, no special permissions or Chromium-only APIs required
+- **Recent Recordings** — a live list of what's been scanned today, pulled from the account's own history
+
+*Desktop app features live in [`../desktop/README.md`](../desktop/README.md).*
+
+---
 
 ## What's here
 
