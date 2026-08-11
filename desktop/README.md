@@ -37,6 +37,9 @@ EcomLens Pro Max is the online-activated edition of EcomLens — a desktop appli
 - Barcode scanner or camera with scanning capability
 - Internet connection for initial activation (not required day-to-day afterward)
 
+### Built With
+Electron · vanilla JS (no frontend framework) · better-sqlite3 · Tailwind CSS v4. Full breakdown in [DEVELOPER.md](DEVELOPER.md#tech-stack).
+
 ---
 
 ## 📈 Business Applications

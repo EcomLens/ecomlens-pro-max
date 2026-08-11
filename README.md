@@ -5,6 +5,17 @@ Monorepo for EcomLens Pro Max — the online-activated edition of EcomLens, sold
 - [`desktop/`](desktop) — the Electron desktop app, one-time purchase, activated online then usable offline. **Features:** [`desktop/README.md`](desktop/README.md#-key-features) · **Architecture:** [`desktop/DEVELOPER.md`](desktop/DEVELOPER.md)
 - [`api/`](api) — the backend (accounts, Razorpay licensing + invoicing, admin dashboard), plus the browser-based web app (`/app`) and the public marketing/purchase page (`/`) intended for `ecomlens.jinzy.com`. **Web app features:** [`api/README.md`](api/README.md#-web-app--key-features-app) · **Architecture:** [`api/DEVELOPER.md`](api/DEVELOPER.md)
 
+## Tech stack at a glance
+
+| | Desktop | Backend + Web app |
+|---|---|---|
+| Runtime | Electron | Node.js + Express 5 |
+| Data | better-sqlite3 | Prisma 5 + SQLite (Postgres-ready) |
+| Frontend | Vanilla JS, Tailwind CSS v4 | Vanilla JS, no framework |
+| Payments / auth | — (activates against the backend) | Razorpay SDK, JWT sessions |
+
+Neither side uses a frontend framework or a JS build step by design — see each project's `DEVELOPER.md` for the full reasoning and the rest of the stack.
+
 ## Relationship to other EcomLens repos
 
 - [`EcomLens/ecomlens-desktop`](https://github.com/EcomLens/ecomlens-desktop) — the original app.

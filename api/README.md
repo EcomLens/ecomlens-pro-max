@@ -4,6 +4,8 @@ Backend service for EcomLens Pro Max — accounts, desktop license activation, a
 
 Part of the [ecomlens-pro-max](../) monorepo — see [`../desktop`](../desktop) for the desktop client this also serves. For architecture, the request/auth model, database schema, and known quirks, see [DEVELOPER.md](DEVELOPER.md).
 
+**Built with:** Node.js + Express 5 · Prisma 5 + SQLite (Postgres-ready) · Razorpay SDK · JWT sessions · vanilla HTML/CSS/JS on the frontend, no framework or build step. Full breakdown in [DEVELOPER.md](DEVELOPER.md#tech-stack).
+
 ---
 
 ## ✨ Web App — Key Features (`/app`)

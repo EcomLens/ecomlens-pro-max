@@ -52,3 +52,14 @@ h1, h2, h3 { font-family: "Fraunces", Georgia, serif; font-weight: 600; color: v
 
 .error-text { color: #C0392B; font-size: 13px; margin-top: 12px; }
 .hidden { display: none !important; }
+
+/* The EcomLens logo files have a pure-black (#000000) background baked in -
+   this panel matches it so there's no visible seam wherever the logo sits
+   on a lighter background. Same fix used in the desktop app's
+   .ecom-logo-panel (src/styles/styles.css). */
+.brand-logo {
+  display: inline-flex; align-items: center;
+  background: radial-gradient(circle at 30% 20%, #2a2a2a 0%, #0D0D0D 65%);
+  border-radius: 8px; padding: 6px 12px;
+}
+.brand-logo img { height: 26px; width: auto; display: block; }

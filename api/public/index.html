@@ -37,14 +37,14 @@
     {
       "@type": "Offer",
       "name": "EcomLens Pro Max — Desktop",
-      "price": "9999",
+      "price": "6499",
       "priceCurrency": "INR",
       "availability": "https://schema.org/InStock"
     },
     {
       "@type": "Offer",
       "name": "EcomLens Web — Pay per scan",
-      "price": "8",
+      "price": "1.5",
       "priceCurrency": "INR",
       "availability": "https://schema.org/InStock"
     }
@@ -222,11 +222,15 @@ header.site {
   display: flex; align-items: center; justify-content: space-between;
   padding-block: 16px;
 }
-.wordmark {
-  font-family: "Fraunces", serif; font-weight: 600; font-size: 21px;
-  display: flex; align-items: baseline; gap: 2px; letter-spacing: -0.01em;
+/* The logo files have a pure-black background baked in - this panel
+   matches it so there's no visible seam on the page's lighter background.
+   Same fix used in the desktop app's .ecom-logo-panel. */
+.brand-logo {
+  display: inline-flex; align-items: center;
+  background: radial-gradient(circle at 30% 20%, #2a2a2a 0%, #0D0D0D 65%);
+  border-radius: 8px; padding: 6px 12px;
 }
-.wordmark .dot { color: var(--accent); }
+.brand-logo img { height: 26px; width: auto; display: block; }
 .nav-links { display: flex; align-items: center; gap: 28px; }
 .nav-links a {
   text-decoration: none; font-size: 14px; font-weight: 500; color: var(--fg-body);
@@ -365,10 +369,18 @@ section { padding-block: 64px; }
   font-family: "IBM Plex Mono", monospace;
 }
 .price-row .amount { font-size: 30px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.price-row .was { font-size: 15px; text-decoration: line-through; opacity: 0.55; font-variant-numeric: tabular-nums; }
 .price-row .per { font-size: 13px; }
 .path-card.desktop .price-row .per,
 .path-card.web .price-row .per { color: var(--fg-muted); }
 .path-card.desktop .price-row .per { color: rgba(246,242,232,0.6); }
+
+.launch-badge {
+  display: inline-flex; align-items: center; margin-top: 20px;
+  font-family: "IBM Plex Mono", monospace; font-size: 11.5px; font-weight: 500;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  background: var(--gold); color: #0D0D0D; padding: 4px 10px; border-radius: 999px;
+}
 
 ul.feature-list { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-direction: column; gap: 11px; flex: 1; }
 ul.feature-list li { display: flex; gap: 10px; font-size: 14.5px; align-items: flex-start; }
@@ -422,6 +434,22 @@ table.compare td strong { font-weight: 600; color: var(--fg); }
 .usecases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 @media (max-width: 900px) { .usecases { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .usecases { grid-template-columns: 1fr; } }
+
+/* ---------- Hardware ---------- */
+.hw-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media (max-width: 780px) { .hw-groups { grid-template-columns: 1fr; } }
+.hw-group-title { font-size: 15px; font-family: "IBM Plex Sans", sans-serif; font-weight: 600; margin-bottom: 14px; }
+.hw-list { display: flex; flex-direction: column; gap: 10px; }
+.hw-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--bg-raised); border: 1px solid var(--line); border-radius: 10px;
+  padding: 13px 16px; text-decoration: none; color: var(--fg); transition: border-color 0.15s ease;
+}
+.hw-item:hover { border-color: var(--accent); }
+.hw-item .hw-name { font-size: 14px; font-weight: 500; }
+.hw-item .hw-note { font-size: 12.5px; color: var(--fg-muted); margin-top: 2px; }
+.hw-item .hw-arrow { color: var(--fg-muted); flex-shrink: 0; }
+.hw-disclosure { margin-top: 24px; font-size: 12px; color: var(--fg-muted); }
 .usecase { background: var(--bg-sunken); border-radius: 12px; padding: 20px; }
 .usecase h3 { font-size: 15.5px; font-family: "IBM Plex Sans", sans-serif; font-weight: 600; }
 .usecase p { font-size: 13.5px; color: var(--fg-muted); margin-top: 8px; }
@@ -441,7 +469,7 @@ footer {
 
 <header class="site">
   <div class="wrap nav">
-    <div class="wordmark">EcomLens<span class="dot">.</span></div>
+    <div class="brand-logo"><img src="/assets/ecomlense-logo.jpeg" alt="EcomLens"></div>
     <nav class="nav-links">
       <a href="#paths">Desktop &amp; Web</a>
       <a href="#compare">Compare</a>
@@ -503,7 +531,8 @@ footer {
           </div>
           <h3>Install it once. It's yours.</h3>
           <p class="path-sub">A native app for a warehouse machine that's always on the floor. Activate online once, then run offline every day after.</p>
-          <div class="price-row"><span class="amount">₹9,999</span><span class="per">/ one-time · per install</span></div>
+          <div class="launch-badge">Launch price — 35% off</div>
+          <div class="price-row"><span class="amount">₹6,499</span><span class="was">₹9,999</span><span class="per">/ one-time · per install</span></div>
           <ul class="feature-list">
             <li><svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Works fully offline after activation</li>
             <li><svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Recordings save to a folder you choose</li>
@@ -522,7 +551,7 @@ footer {
           </div>
           <h3>No install. Just log in and scan.</h3>
           <p class="path-sub">Runs in the browser on any machine with a camera. Buy scan credits as you go — nothing to install, nothing to maintain.</p>
-          <div class="price-row"><span class="amount">₹8</span><span class="per">/ scan · credits, no expiry</span></div>
+          <div class="price-row"><span class="amount">₹1.5</span><span class="per">/ scan · credits, no expiry</span></div>
           <ul class="feature-list">
             <li><svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Live on any shared or borrowed computer</li>
             <li><svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Recordings still save to your machine</li>
@@ -604,11 +633,34 @@ footer {
             <tr><td class="dim">Best for</td><td><strong>One fixed station</strong>, used daily</td><td><strong>Occasional or shared</strong> use</td></tr>
             <tr><td class="dim">Setup</td><td>Install once, activate online</td><td>None — open a browser tab</td></tr>
             <tr><td class="dim">Works offline</td><td>Yes, after first activation</td><td>No — needs a connection to record</td></tr>
-            <tr><td class="dim">Pricing</td><td>₹9,999 one time, per machine</td><td>₹8 per scan, top up anytime</td></tr>
+            <tr><td class="dim">Pricing</td><td>₹6,499 launch price (35% off ₹9,999), per machine</td><td>₹1.50 per scan, top up anytime</td></tr>
             <tr><td class="dim">Where video is stored</td><td>A folder you choose, locally</td><td>Locally, on the machine in use</td></tr>
           </tbody>
         </table>
       </div>
+    </div>
+  </section>
+
+  <section id="hardware">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Before you start</p>
+        <h2>You'll need a webcam and a barcode scanner.</h2>
+        <p>EcomLens works with any standard USB webcam and any USB barcode scanner running in keyboard-emulation mode — no drivers, no special model required. If you don't already have either, here are a few solid options to start with.</p>
+      </div>
+
+      <div class="hw-groups">
+        <div class="hw-group">
+          <h3 class="hw-group-title">Webcams</h3>
+          <div class="hw-list" id="hwWebcams"></div>
+        </div>
+        <div class="hw-group">
+          <h3 class="hw-group-title">Barcode Scanners</h3>
+          <div class="hw-list" id="hwScanners"></div>
+        </div>
+      </div>
+
+      <p class="hw-disclosure">As an Amazon Associate, Jinzy may earn from qualifying purchases made through these links, at no extra cost to you.</p>
     </div>
   </section>
 
@@ -631,7 +683,7 @@ footer {
 <footer>
   <div class="wrap">
     <div class="footer-row">
-      <div class="wordmark" style="font-size:17px;">EcomLens<span class="dot">.</span></div>
+      <div class="brand-logo"><img src="/assets/ecomlense-logo.jpeg" alt="EcomLens"></div>
       <div class="footer-links">
         <a href="#paths">Desktop</a>
         <a href="#paths">Web</a>
@@ -787,6 +839,48 @@ footer {
 
   enBtn.addEventListener("click", () => setLang("en"));
   hiBtn.addEventListener("click", () => setLang("hi"));
+})();
+</script>
+
+<script>
+(function () {
+  // Amazon Associates (India) tracking ID. Empty for now - no tag is
+  // appended until this is set, so links work cleanly either way. Once you
+  // have an Associates ID from affiliate-program.amazon.in, set it here and
+  // every link below starts earning - nothing else needs to change.
+  const AMAZON_AFFILIATE_TAG = "";
+
+  function withTag(url) {
+    if (!AMAZON_AFFILIATE_TAG) return url;
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}tag=${AMAZON_AFFILIATE_TAG}`;
+  }
+
+  const webcams = [
+    { name: "Logitech C920 HD Pro Webcam", note: "1080p, autofocus, dual mic - the reliable default", url: "https://www.amazon.in/Logitech-C920-Pro-Webcam-Microphones/dp/B006JH8T3S" },
+    { name: "Logitech C920e Widescreen Webcam", note: "Business variant of the C920 - good for a fixed station", url: "https://www.amazon.in/Logitech-C920e-Widescreen-1080p-Webcam/dp/B01N5Y4MU9" },
+  ];
+
+  const scanners = [
+    { name: "Industrial-Grade 1D/2D Barcode Scanner", note: "Heavy-duty, high-speed chip, USB plug & play", url: "https://www.amazon.in/Industrial-Grade-Superior-High-Precision-Scanning-High-Speed/dp/B09F5FRS23" },
+    { name: "Tera Wireless/Wired Barcode Scanner", note: "1D/2D/QR, works wired or wireless", url: "https://www.amazon.in/Tera-Wireless-Portable-Handheld-Vibration/dp/B07M68LS2N" },
+    { name: "UNIDEEPLY USB Barcode Scanner", note: "Wired USB, budget-friendly, 1D/2D/QR", url: "https://www.amazon.in/Scanners-Computers-UNIDEEPLY-Handheld-Scanning/dp/B097GYYJ11" },
+  ];
+
+  function renderList(containerId, items) {
+    document.getElementById(containerId).innerHTML = items.map(item => `
+      <a class="hw-item" href="${withTag(item.url)}" target="_blank" rel="noopener sponsored">
+        <div>
+          <div class="hw-name">${item.name}</div>
+          <div class="hw-note">${item.note}</div>
+        </div>
+        <svg class="hw-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </a>
+    `).join("");
+  }
+
+  renderList("hwWebcams", webcams);
+  renderList("hwScanners", scanners);
 })();
 </script>
 </body>
