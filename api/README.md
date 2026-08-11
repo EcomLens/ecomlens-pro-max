@@ -1,17 +1,18 @@
 # ecomlens-api
 
-Backend service for EcomLens Pro Max — accounts, desktop license activation, an admin dashboard, and (future) web credits/billing, all off one shared customer/account system.
+Backend service for EcomLens Pro Max — accounts, desktop license activation, an admin dashboard, the web scanning app, and the public marketing site, all off one shared customer/account system.
 
-Part of the [ecomlens-pro-max](../) monorepo — see [`../desktop`](../desktop) for the client this serves.
+Part of the [ecomlens-pro-max](../) monorepo — see [`../desktop`](../desktop) for the desktop client this also serves.
 
-## What's here (Phase 1 + admin dashboard)
+## What's here
 
-- **Accounts** — signup/login, shared by desktop licensing and the future web tier. Login issues a JWT session token.
+- **Accounts** — signup/login, shared by desktop licensing and the web app. Login issues a JWT session token.
 - **Desktop license purchase** — creates a Razorpay Invoice (hosted payment page + automatic invoice email) for the EcomLens Pro Max one-time license.
 - **Webhook handler** — verifies Razorpay's signature on `invoice.paid` and activates the corresponding license.
 - **Activation endpoint** — called by the desktop app to redeem a key and, afterward, to periodically re-validate in the background.
 - **Admin dashboard** (`/admin`) — total licenses issued, revenue (total / by customer / by day), full invoice history, and one-click invoice resend. Gated behind an `isAdmin` account flag.
-- **Marketing landing page** (`/`) — presents the Desktop Pro Max and Web (pay-per-scan) purchase paths side by side; the "Download for Windows" CTA calls `/api/license/purchase` directly, so a real invoice gets created from the page itself. Pricing shown is placeholder.
+- **Marketing landing page** (`/`) — SEO-tagged (meta description, Open Graph, Twitter Card, JSON-LD `SoftwareApplication` schema, `robots.txt`, `sitemap.xml`), presents the Desktop Pro Max and Web (pay-per-scan) purchase paths side by side, a bilingual (English/Hindi) demo video that loads nothing until played, and a "Download for Windows" CTA wired to `/api/license/purchase` directly. Pricing shown is placeholder.
+- **Web scanning app** (`/app`) — browser-based version of the scan-triggered recording flow (login/signup, camera + scanner connection detection, barcode-triggered recording start/stop). Recordings save via plain browser download (works in any browser; the polished Chromium-only folder-picker alternative was considered and deliberately not used). Recording metadata (barcode + timestamp, never the video itself) is logged to `Recording` so Phase 3 (credit billing) and Phase 4 (partner API) don't need retrofitting later.
 
 ## Setup
 
@@ -48,7 +49,11 @@ Then visit `/admin` (e.g. `http://localhost:4000/admin/`) and log in with that a
 | GET | `/api/admin/revenue/by-day` | Revenue grouped by day (admin only) |
 | GET | `/api/admin/invoices` | Full invoice/purchase history (admin only) |
 | POST | `/api/admin/invoices/:id/resend` | Resend the original invoice to the original customer via Razorpay (admin only) |
+| POST | `/api/recordings` | Log a completed web-app recording's metadata (barcode, timestamp) against the logged-in account |
+| GET | `/api/recordings` | List the logged-in account's recent recordings |
 | GET | `/health` | Liveness check |
+
+`/api/recordings/*` requires `Authorization: Bearer <token>` from any logged-in account (not admin-only, unlike `/api/admin/*`).
 
 Admin routes require `Authorization: Bearer <token>` from a login response where `isAdmin: true`.
 
@@ -60,4 +65,6 @@ In the Razorpay Dashboard under Settings → Webhooks, point a webhook at `<depl
 
 ## Roadmap
 
-Phases 2-4 (web scanning app, credit-based billing, partner integration API with webhooks) are planned but not yet built — see [`../README.md`](../README.md) for the full phased plan.
+The web app's core scanning/recording flow (Phase 2) is built. Credit-based billing for it (Phase 3) and the partner integration API with webhooks (Phase 4) are still ahead — see [`../README.md`](../README.md) for the full phased plan.
+
+One small gap: `og:image` in the landing page's `<head>` points at `/og-image.png`, which doesn't exist yet (attempted to generate one but the available tooling in this environment couldn't reliably render/rasterize it — not worth blocking on). Add a real 1200×630 branded image at `public/og-image.png` before the site goes live, or social share previews will show a broken image.

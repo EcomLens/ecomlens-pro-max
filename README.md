@@ -3,7 +3,7 @@
 Monorepo for EcomLens Pro Max — the online-activated edition of EcomLens.
 
 - [`desktop/`](desktop) — the Electron desktop app. Barcode-scan-triggered product video recording, gated behind a one-time online license activation, usable offline afterward. See [`desktop/DEVELOPER.md`](desktop/DEVELOPER.md).
-- [`api/`](api) — the backend that issues and validates those licenses (accounts, Razorpay purchase + invoicing, activation), the internal admin dashboard (`/admin`) for revenue/invoices/resend, and the public marketing/purchase page (`/`) intended for `ecomlens.jinzy.com`. See [`api/README.md`](api/README.md).
+- [`api/`](api) — the backend that issues and validates those licenses (accounts, Razorpay purchase + invoicing, activation), the internal admin dashboard (`/admin`) for revenue/invoices/resend, the browser-based web scanning app (`/app`), and the public marketing/purchase page (`/`) intended for `ecomlens.jinzy.com`. See [`api/README.md`](api/README.md).
 
 ## Relationship to other EcomLens repos
 

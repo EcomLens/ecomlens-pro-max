@@ -11,13 +11,14 @@ datasource db {
 }
 
 model Account {
-  id           String    @id @default(cuid())
-  email        String    @unique
+  id           String      @id @default(cuid())
+  email        String      @unique
   passwordHash String
   name         String?
-  isAdmin      Boolean   @default(false)
-  createdAt    DateTime  @default(now())
+  isAdmin      Boolean     @default(false)
+  createdAt    DateTime    @default(now())
   licenses     License[]
+  recordings   Recording[]
 }
 
 // One row per desktop Pro Max purchase attempt. Created in "pending" state
@@ -37,4 +38,16 @@ model License {
   activatedAt        DateTime?
   lastValidatedAt    DateTime?
   createdAt          DateTime  @default(now())
+}
+
+// Metadata only, logged by the web app after each recording - the video
+// itself stays on the customer's own machine (plain browser download), never
+// uploaded here. This is what Phase 3 (credit deduction) and Phase 4
+// (partner API "recording done" webhook/lookup) will build on.
+model Recording {
+  id         String   @id @default(cuid())
+  accountId  String
+  account    Account  @relation(fields: [accountId], references: [id])
+  barcode    String
+  recordedAt DateTime @default(now())
 }

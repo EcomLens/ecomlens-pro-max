@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const licenseRoutes = require("./routes/license");
 const webhookRoutes = require("./routes/webhooks");
 const adminRoutes = require("./routes/admin");
+const recordingRoutes = require("./routes/recordings");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/license", licenseRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/recordings", recordingRoutes);
 
 app.use(express.static("public"));
 

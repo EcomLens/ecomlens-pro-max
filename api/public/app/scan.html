@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcomLens Web | Scan</title>
+<link rel="stylesheet" href="/brand.css">
+<style>
+  body { min-height: 100vh; }
+  header {
+    background: var(--navy-dark); color: var(--cream); padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .wordmark { font-family: "Fraunces", serif; font-weight: 600; font-size: 18px; }
+  .wordmark span { color: var(--gold); }
+  .header-right { display: flex; align-items: center; gap: 16px; font-size: 13.5px; }
+  .header-right button {
+    background: transparent; border: 1px solid rgba(255,253,247,0.3); color: var(--cream);
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px;
+  }
+  .header-right button:hover { border-color: var(--gold); color: var(--gold); }
+
+  main { display: flex; gap: 16px; padding: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; flex-wrap: wrap; }
+  .scan-col { flex: 1 1 520px; min-width: 320px; }
+  .side-col { flex: 0 1 360px; min-width: 280px; background: var(--navy-dark); border-radius: 14px; padding: 18px; color: var(--cream); }
+
+  #connectionStatus {
+    background: rgba(43,69,112,0.06); border: 1px solid var(--cream-dark); border-radius: 12px;
+    padding: 12px; margin-bottom: 14px; font-size: 13.5px;
+  }
+  .status-row { display: flex; gap: 18px; }
+  .status-item { display: flex; align-items: center; gap: 6px; color: var(--text-dim); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; }
+  .status-dot.on { background: #2E8B57; }
+  #connectionPassed { display: none; align-items: center; gap: 8px; color: var(--navy); font-weight: 600; font-size: 13.5px; margin-top: 10px; }
+  #connectionPassed.show { display: flex; }
+
+  .camera-wrap { position: relative; background: var(--cream-dark); border-radius: 14px; overflow: hidden; aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; }
+  .camera-wrap video { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .camera-placeholder { display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-dim); }
+  #blinkWrap { position: absolute; top: 14px; left: 14px; display: none; align-items: center; gap: 8px; background: rgba(13,13,13,0.55); padding: 6px 12px; border-radius: 999px; }
+  #blinkWrap.show { display: flex; }
+  #blinkDot { width: 10px; height: 10px; border-radius: 50%; background: #E06155; animation: pulse 1.3s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  #timer { font-family: "IBM Plex Mono", monospace; color: #fff; font-weight: 600; font-size: 13.5px; }
+
+  #barcodeInput {
+    width: 100%; margin-top: 16px; font-family: "IBM Plex Mono", monospace; font-size: 18px; font-weight: 600;
+    text-align: center; padding: 14px; border: 2px dashed var(--navy); border-radius: 10px; background: var(--cream-dark);
+    outline: none;
+  }
+  #barcodeInput.scanning { border-color: #2E8B57; color: #2E8B57; }
+  #scanInfo { display: block; text-align: center; margin-top: 8px; font-size: 13px; color: var(--text-dim); }
+
+  .controls-row { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; gap: 12px; flex-wrap: wrap; }
+  #lastRecordingBtn {
+    background: #B3B3B3; color: #fff; border: none; padding: 10px 18px; border-radius: 8px;
+    font-family: inherit; font-weight: 600; font-size: 13.5px; cursor: not-allowed;
+  }
+  #lastRecordingBtn.enabled { background: #E06155; cursor: pointer; }
+  .save-note { font-size: 12px; color: var(--text-dim); font-family: "IBM Plex Mono", monospace; }
+
+  .side-col h2 { font-size: 16px; color: var(--cream); display: flex; align-items: center; justify-content: space-between; }
+  #todayBadge { font-size: 11px; background: rgba(255,255,255,0.1); color: var(--gold); padding: 2px 8px; border-radius: 999px; font-family: "IBM Plex Mono", monospace; }
+  #recentList { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; }
+  .recent-item { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .recent-item .rb { font-family: "IBM Plex Mono", monospace; }
+  .recent-item .rd { color: rgba(255,253,247,0.55); font-size: 11.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">EcomLens<span>.</span> Web</div>
+  <div class="header-right">
+    <span id="userLabel"></span>
+    <button id="logoutBtn" type="button">Log out</button>
+  </div>
+</header>
+
+<main>
+  <div class="scan-col">
+    <div id="connectionStatus">
+      <div class="status-row">
+        <span class="status-item"><span class="status-dot" id="camDot"></span><span id="camText">Camera: Checking...</span></span>
+        <span class="status-item"><span class="status-dot" id="scanDot"></span><span id="scanText">Scanner: Not confirmed</span></span>
+      </div>
+      <div id="connectionPassed">✓ Connection passed — scan a barcode to start recording</div>
+    </div>
+
+    <div class="camera-wrap">
+      <video id="video" autoplay muted playsinline></video>
+      <div class="camera-placeholder" id="cameraPlaceholder">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>Waiting for camera…</span>
+      </div>
+      <div id="blinkWrap"><span id="blinkDot"></span><span id="timer">00:00</span></div>
+    </div>
+
+    <input id="barcodeInput" type="text" placeholder="Click here, then scan a barcode" autocomplete="off" />
+    <span id="scanInfo">Click inside the box above, then scan a barcode to start recording</span>
+
+    <div class="controls-row">
+      <button id="lastRecordingBtn" type="button" disabled>Click here after your last recording is completed</button>
+      <span class="save-note">// each recording downloads to your browser's downloads folder</span>
+    </div>
+  </div>
+
+  <div class="side-col">
+    <h2>Recent recordings <span id="todayBadge">Today: 0</span></h2>
+    <div id="recentList"><p style="color:rgba(255,253,247,0.5); font-size:13px;">Loading…</p></div>
+  </div>
+</main>
+
+<script>
+// ---- Auth guard ----
+const token = localStorage.getItem("ecomlensToken");
+const user = JSON.parse(localStorage.getItem("ecomlensUser") || "null");
+if (!token) window.location.href = "/app/index.html";
+document.getElementById("userLabel").textContent = user?.name || user?.email || "";
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("ecomlensToken");
+  localStorage.removeItem("ecomlensUser");
+  window.location.href = "/app/index.html";
+});
+
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...(options.headers || {}) },
+  });
+  return res.json();
+}
+
+// ---- Persistent recording state ----
+let recorder, stream, chunks = [];
+let isRecording = false;
+let cameraInitInProgress = false;
+let activeBarcode = null, activeStartTs = null, queuedBarcode = null;
+let cameraConfirmed = false, scannerConfirmed = false, hasAnnouncedConnectionPassed = false;
+let scanBuffer = "";
+let intervalObject = null;
+
+const TEST_BARCODE_VALUE = "ECOMLENSTEST01";
+const ignoredKeys = ["Shift","Control","Alt","Meta","CapsLock","Tab","Escape","Backspace","Delete",
+  "ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Home","End","PageUp","PageDown","Insert","Enter",
+  "ContextMenu","ScrollLock","Pause","PrintScreen","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12"];
+
+const video = document.getElementById("video");
+const cameraPlaceholder = document.getElementById("cameraPlaceholder");
+const barcodeInput = document.getElementById("barcodeInput");
+const lastRecordingBtn = document.getElementById("lastRecordingBtn");
+
+function speak(text) {
+  try {
+    if (!("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    window.speechSynthesis.speak(u);
+  } catch (err) { console.warn("Speech synthesis failed:", err); }
+}
+
+function updateConnectionStatus(startingRecording) {
+  document.getElementById("camText").textContent = cameraConfirmed ? "Camera: Connected" : "Camera: Not connected";
+  document.getElementById("camDot").classList.toggle("on", cameraConfirmed);
+  document.getElementById("scanText").textContent = scannerConfirmed ? "Scanner: Connected" : "Scanner: Not confirmed";
+  document.getElementById("scanDot").classList.toggle("on", scannerConfirmed);
+
+  const passed = document.getElementById("connectionPassed");
+  if (cameraConfirmed && scannerConfirmed) {
+    passed.classList.add("show");
+    if (!hasAnnouncedConnectionPassed) {
+      hasAnnouncedConnectionPassed = true;
+      passed.textContent = startingRecording ? "✓ Connection passed — recording started" : "✓ Connection passed — scan a barcode to start recording";
+      speak(startingRecording ? "Connection passed. Recording started." : "Connection passed. Scan a barcode to start recording.");
+    }
+  } else {
+    passed.classList.remove("show");
+  }
+}
+
+function markCameraConfirmed(connected) {
+  if (cameraConfirmed === connected) return;
+  cameraConfirmed = connected;
+  updateConnectionStatus(false);
+}
+function markScannerConfirmed(startingRecording) {
+  if (scannerConfirmed) return;
+  scannerConfirmed = true;
+  updateConnectionStatus(startingRecording);
+}
+
+function recordingStatusUI(mode) {
+  const wrap = document.getElementById("blinkWrap");
+  const timer = document.getElementById("timer");
+  if (mode === "show") {
+    let seconds = 0;
+    timer.textContent = "00:00";
+    wrap.classList.add("show");
+    intervalObject = setInterval(() => {
+      seconds++;
+      const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+      const s = String(seconds % 60).padStart(2, "0");
+      timer.textContent = `${m}:${s}`;
+    }, 1000);
+  } else {
+    clearInterval(intervalObject);
+    wrap.classList.remove("show");
+  }
+}
+
+function tsString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}-${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function sanitize(name) {
+  return String(name).replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").trim();
+}
+
+// Temporary, chosen save method: plain browser download. Works in every
+// browser, no special permissions - the tradeoff is it lands in the
+// browser's default downloads folder rather than a folder the user picks.
+function saveRecordingLocally(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.mp4`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function initCamera() {
+  stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+  video.srcObject = stream;
+
+  let options = { videoBitsPerSecond: 2_500_000 };
+  const preferredMimeType = "video/mp4;codecs=avc1.42E01E,mp4a.40.2";
+  if (MediaRecorder.isTypeSupported(preferredMimeType)) options.mimeType = preferredMimeType;
+  recorder = new MediaRecorder(stream, options);
+
+  recorder.onstart = () => {
+    recordingStatusUI("show");
+    isRecording = true;
+    chunks = [];
+    lastRecordingBtn.disabled = false;
+    lastRecordingBtn.classList.add("enabled");
+  };
+
+  recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+
+  recorder.onstop = async () => {
+    recordingStatusUI("hide");
+    isRecording = false;
+    lastRecordingBtn.disabled = true;
+    lastRecordingBtn.classList.remove("enabled");
+
+    if (chunks.length > 0 && activeBarcode) {
+      const blob = new Blob(chunks, { type: "video/mp4" });
+      const safe = sanitize(activeBarcode);
+      const filename = `${safe}_${activeStartTs}`;
+      saveRecordingLocally(blob, filename);
+      await api("/api/recordings", { method: "POST", body: JSON.stringify({ barcode: activeBarcode }) });
+      loadRecent();
+    }
+
+    activeBarcode = null;
+    activeStartTs = null;
+    chunks = [];
+
+    if (queuedBarcode) {
+      const next = queuedBarcode;
+      queuedBarcode = null;
+      startRecordingForBarcode(next);
+    }
+  };
+}
+
+async function tryInitCamera() {
+  if (cameraInitInProgress) return;
+  cameraInitInProgress = true;
+  try {
+    await initCamera();
+    cameraPlaceholder.style.display = "none";
+    video.style.display = "block";
+    markCameraConfirmed(true);
+  } catch (err) {
+    console.error("Camera init failed:", err);
+    video.style.display = "none";
+    cameraPlaceholder.style.display = "flex";
+    markCameraConfirmed(false);
+  } finally {
+    cameraInitInProgress = false;
+  }
+}
+
+navigator.mediaDevices.ondevicechange = async () => {
+  if (cameraConfirmed || cameraInitInProgress) return;
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    if (devices.some((d) => d.kind === "videoinput")) await tryInitCamera();
+  } catch (err) { console.warn("Device change check failed:", err); }
+};
+
+function startRecording() {
+  if (!isRecording) { recorder.start(); return; }
+}
+function stopRecording() {
+  if (isRecording) { recorder.stop(); return; }
+}
+function startRecordingForBarcode(barcode) {
+  if (!recorder) return;
+  activeBarcode = barcode;
+  activeStartTs = tsString();
+  startRecording();
+}
+
+function finalizeScan(scan) {
+  if (!scan) return;
+  if (!recorder) return;
+
+  barcodeInput.value = scan;
+
+  if (isRecording) {
+    queuedBarcode = scan;
+    stopRecording();
+  } else {
+    startRecordingForBarcode(scan);
+  }
+}
+
+function keyHandler(e) {
+  if (e.key === "Enter") {
+    const trimmed = scanBuffer.trim();
+    const willStartRecording = trimmed && trimmed !== TEST_BARCODE_VALUE && trimmed !== "END" && trimmed !== "LAST";
+
+    if (trimmed) markScannerConfirmed(willStartRecording);
+
+    if (trimmed === TEST_BARCODE_VALUE) {
+      // confirmation only, no recording
+    } else if (trimmed === "END" || trimmed === "LAST") {
+      // no-op
+    } else if (trimmed) {
+      finalizeScan(trimmed);
+    }
+    scanBuffer = "";
+  } else if (!ignoredKeys.includes(e.key) && e.key.length === 1) {
+    scanBuffer += e.key;
+  }
+}
+
+barcodeInput.addEventListener("focusin", () => {
+  barcodeInput.classList.add("scanning");
+  document.getElementById("scanInfo").textContent = "Scanning...";
+});
+barcodeInput.addEventListener("focusout", () => {
+  barcodeInput.classList.remove("scanning");
+  document.getElementById("scanInfo").textContent = "Click inside the box above, then scan a barcode to start recording";
+});
+barcodeInput.addEventListener("keydown", keyHandler);
+lastRecordingBtn.addEventListener("click", stopRecording);
+
+// ---- Recent recordings + today count ----
+function formatDate(iso) {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? iso : d.toLocaleString();
+}
+async function loadRecent() {
+  const body = await api("/api/recordings");
+  const list = document.getElementById("recentList");
+  const records = body?.data || [];
+
+  if (records.length === 0) {
+    list.innerHTML = `<p style="color:rgba(255,253,247,0.5); font-size:13px;">No recordings yet.</p>`;
+  } else {
+    list.innerHTML = records.map(r => `
+      <div class="recent-item">
+        <span class="rb">${r.barcode}</span>
+        <span class="rd">${formatDate(r.recordedAt)}</span>
+      </div>
+    `).join("");
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCount = records.filter(r => r.recordedAt.slice(0, 10) === today).length;
+  document.getElementById("todayBadge").textContent = `Today: ${todayCount}`;
+}
+
+tryInitCamera();
+loadRecent();
+</script>
+</body>
+</html>

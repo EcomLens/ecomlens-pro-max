@@ -1,0 +1,54 @@
+@font-face { font-family: "Fraunces"; font-weight: 600; font-style: normal; font-display: swap; src: url(/fonts/fraunces-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 400; font-style: italic; font-display: swap; src: url(/fonts/fraunces-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-style: normal; font-display: swap; src: url(/fonts/ibm-plex-sans-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 500; font-style: normal; font-display: swap; src: url(/fonts/ibm-plex-sans-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 600; font-style: normal; font-display: swap; src: url(/fonts/ibm-plex-sans-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url(/fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; font-style: normal; font-display: swap; src: url(/fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2"); }
+
+:root {
+  --ink: #0D0D0D;
+  --navy: #2B4570;
+  --navy-dark: #16233A;
+  --gold: #F5C518;
+  --gold-deep: #D9A900;
+  --cream: #FFFDF7;
+  --cream-dark: #F2EAD9;
+  --text-dim: #7A756A;
+  --text-body: #3A3A3A;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--text-body);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  line-height: 1.5;
+}
+h1, h2, h3 { font-family: "Fraunces", Georgia, serif; font-weight: 600; color: var(--ink); margin: 0; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 15px; font-weight: 600; font-family: inherit; text-decoration: none;
+  padding: 12px 20px; border-radius: 8px; border: 1px solid transparent;
+  cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary { background: var(--gold); color: var(--ink); }
+.btn-primary:hover:not(:disabled) { background: var(--gold-deep); }
+.btn-ghost { background: transparent; color: var(--ink); border-color: rgba(13,13,13,0.18); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--navy); color: var(--navy); }
+
+.field-label {
+  display: block; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-dim); margin-top: 16px; margin-bottom: 6px;
+}
+.field-input {
+  width: 100%; padding: 11px 13px; border-radius: 8px; border: 1px solid rgba(13,13,13,0.18);
+  background: #fff; color: var(--ink); font-size: 14.5px; font-family: inherit;
+}
+.field-input:focus { outline: 2px solid var(--navy); outline-offset: 1px; }
+
+.error-text { color: #C0392B; font-size: 13px; margin-top: 12px; }
+.hidden { display: none !important; }
