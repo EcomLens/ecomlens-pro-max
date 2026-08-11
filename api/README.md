@@ -11,6 +11,7 @@ Part of the [ecomlens-pro-max](../) monorepo — see [`../desktop`](../desktop) 
 - **Webhook handler** — verifies Razorpay's signature on `invoice.paid` and activates the corresponding license.
 - **Activation endpoint** — called by the desktop app to redeem a key and, afterward, to periodically re-validate in the background.
 - **Admin dashboard** (`/admin`) — total licenses issued, revenue (total / by customer / by day), full invoice history, and one-click invoice resend. Gated behind an `isAdmin` account flag.
+- **Marketing landing page** (`/`) — presents the Desktop Pro Max and Web (pay-per-scan) purchase paths side by side; the "Download for Windows" CTA calls `/api/license/purchase` directly, so a real invoice gets created from the page itself. Pricing shown is placeholder.
 
 ## Setup
 
