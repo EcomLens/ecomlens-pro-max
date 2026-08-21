@@ -3,7 +3,7 @@
 Monorepo for EcomLens Pro Max — the online-activated edition of EcomLens, sold two ways: a one-time desktop license, or a pay-per-scan web app. Both share one backend, one accounts system, and the same scan-triggered recording engine.
 
 - [`desktop/`](desktop) — the Electron desktop app, one-time purchase, activated online then usable offline. **Features:** [`desktop/README.md`](desktop/README.md#-key-features) · **Architecture:** [`desktop/DEVELOPER.md`](desktop/DEVELOPER.md)
-- [`api/`](api) — the backend (accounts, Razorpay licensing + invoicing, admin dashboard), plus the browser-based web app (`/app`) and the public marketing/purchase page (`/`) intended for `ecomlens.jinzy.com`. **Web app features:** [`api/README.md`](api/README.md#-web-app--key-features-app) · **Architecture:** [`api/DEVELOPER.md`](api/DEVELOPER.md)
+- [`api/`](api) — the backend (accounts, Razorpay licensing + invoicing, admin dashboard), plus the browser-based web app (`/app`) and the public marketing/purchase page (`/`) intended for `ecomlens.jynzi.com`. **Web app features:** [`api/README.md`](api/README.md#-web-app--key-features-app) · **Architecture:** [`api/DEVELOPER.md`](api/DEVELOPER.md)
 
 ## Tech stack at a glance
 

@@ -1,0 +1,17 @@
+services:
+  api:
+    build: .
+    container_name: ecomlens
+    restart: always
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ecomlens.rule=Host(`ecomlens.jynzi.com`)"
+      - "traefik.http.routers.ecomlens.entrypoints=websecure"
+      - "traefik.http.routers.ecomlens.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ecomlens.loadbalancer.server.port=4000"
