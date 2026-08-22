@@ -22,16 +22,17 @@ export async function checkActivationAndShowPanel(){
 }
 
 export async function activate(){
-    const key = document.getElementById("activation-key").value.trim()
+    const email = document.getElementById("activation-email").value.trim()
+    const password = document.getElementById("activation-password").value
     const btn = document.getElementById("activate-btn")
 
-    if(!key){
-        notify("Enter your license key", "error")
+    if(!email || !password){
+        notify("Enter your email and password", "error")
         return
     }
 
     setButtonLoading(btn, true, "Activating...")
-    const response = await window.ipc.activateLicenseIPC(key)
+    const response = await window.ipc.deviceLoginIPC(email, password)
     setButtonLoading(btn, false)
 
     if(response.status){
