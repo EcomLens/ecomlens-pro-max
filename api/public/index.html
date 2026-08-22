@@ -243,7 +243,9 @@ header.site {
   transition: background 0.15s ease;
 }
 .nav-cta:hover { background: var(--gold-deep); }
-@media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+.back-link { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.75; }
+.back-link:hover { opacity: 1; }
+@media (max-width: 720px) { .nav-links a:not(.nav-cta):not(.back-link) { display: none; } }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -471,6 +473,7 @@ footer {
   <div class="wrap nav">
     <div class="brand-logo"><img src="/assets/ecomlense-logo.jpeg" alt="EcomLens"></div>
     <nav class="nav-links">
+      <a class="back-link" href="https://jynzi.com">&larr; Jynzi</a>
       <a href="#paths">Desktop &amp; Web</a>
       <a href="#compare">Compare</a>
       <a href="#how">How it works</a>
@@ -689,9 +692,10 @@ footer {
         <a href="#paths">Web</a>
         <a href="#compare">Compare</a>
         <a href="mailto:support@ecomlens.jynzi.com">Support</a>
+        <a href="https://jynzi.com" class="jynzi-logo-link"><img src="https://jynzi.com/images/jynzi-logo.png" alt="Jynzi" style="height:18px;width:auto;vertical-align:middle;"></a>
       </div>
     </div>
-    <p class="footer-note">// A Jynzi product · support@ecomlens.jynzi.com</p>
+    <p class="footer-note">// A <a href="https://jynzi.com" style="color:inherit;text-decoration:underline;">Jynzi</a> product · support@ecomlens.jynzi.com</p>
   </div>
 </footer>
 
