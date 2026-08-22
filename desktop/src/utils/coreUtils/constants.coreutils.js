@@ -10,8 +10,7 @@ const dbDir = path.join(baseDir, "database");
 const configDir = path.join(baseDir, "config");
 const dbFile = path.join(dbDir, "database.db")  //direct access to db.js
 
-// TODO: update once ecomlens-api is deployed - points at local dev for now.
-const apiBaseUrl = 'http://localhost:4000'
+const apiBaseUrl = 'https://ecomlens.jynzi.com'
 
 exports.CONSTANTS = {
     baseDir,
