@@ -37,6 +37,8 @@ model License {
   currency           String    @default("INR")
   activatedAt        DateTime?
   lastValidatedAt    DateTime?
+  boundDeviceId    String?
+  boundAt    DateTime?
   createdAt          DateTime  @default(now())
 }
 
