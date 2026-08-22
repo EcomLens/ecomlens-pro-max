@@ -3,7 +3,7 @@ const {contextBridge, ipcRenderer} = require("electron")
 contextBridge.exposeInMainWorld("ipc", {
     loginIPC : (username, password) => ipcRenderer.invoke('login', username, password),
     signupIPC : (username, password, firstName) => ipcRenderer.invoke('signup', username, password, firstName),
-    activateLicenseIPC : (key) => ipcRenderer.invoke('activate-license', key),
+    deviceLoginIPC : (email, password) => ipcRenderer.invoke('device-login', email, password),
     getActivationStatusIPC : () => ipcRenderer.invoke('get-activation-status'),
     saveVideoFileIPC : (arrayBuffer, filename, barcode, recording_date, user_id) =>
         ipcRenderer.invoke('save-video-file', arrayBuffer, filename, barcode, recording_date, user_id),
