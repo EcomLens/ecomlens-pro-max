@@ -313,6 +313,36 @@ const authAPI = {
                 msg : `Unable to signup`
             }
         }
+    },
+
+    // Used by the license activation flow to keep the local account in sync
+    // with the server-side password. Unlike signup(), this updates the
+    // password hash if the account already exists instead of silently
+    // failing, so a password changed via claim.html after first activation
+    // isn't left stale on this device.
+    upsertLocalAccount : async function(username, password, firstName) {
+        const sql = `
+            INSERT INTO users (username, password, first_name)
+            VALUES (?, ?, ?)
+            ON CONFLICT(username) DO UPDATE SET
+                password = excluded.password,
+                first_name = COALESCE(excluded.first_name, first_name)
+        `
+        const upsertResult = await INSERTDATA(sql, [username, hashPassword(password), firstName || null])
+        if(upsertResult.status){
+            return {
+                status: true,
+                data : upsertResult,
+                msg : `Local account for ${username} synced successfully.`
+            }
+        }
+        else {
+            return {
+                status: false,
+                data : null,
+                msg : `Unable to sync local account`
+            }
+        }
     }
 }
 

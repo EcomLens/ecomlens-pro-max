@@ -54,9 +54,9 @@ async function deviceLoginIPC(event, email, password) {
             lastValidatedAt: new Date().toISOString(),
         });
         try {
-            await dbAPI.auth.signup(email, password, null);
+            await dbAPI.auth.upsertLocalAccount(email, password, null);
         } catch (seedErr) {
-            console.warn("Local account seed skipped (likely already exists):", seedErr.message);
+            console.warn("Local account sync failed:", seedErr.message);
         }
         return { status: true, msg: "Device activated" };
     } catch (err) {
