@@ -43,6 +43,7 @@ function getActivationStatus() {
     return {
         activated: !!config.activated,
         licenseKey: config.licenseKey || null,
+        licenseCertificate: config.licenseCertificate || null,
         activatedAt: config.activatedAt || null,
         lastValidatedAt: config.lastValidatedAt || null,
     };
