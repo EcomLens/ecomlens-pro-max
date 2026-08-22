@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcomLens | Set Your Password</title>
+<link rel="stylesheet" href="/brand.css">
+<style>
+  body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .auth-card {
+    width: 100%; max-width: 420px; background: #fff; border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(13,13,13,0.04), 0 8px 24px rgba(13,13,13,0.08);
+    padding: 32px;
+  }
+  form { display: flex; flex-direction: column; }
+  .claim-key-input { font-family: monospace; text-transform: uppercase; }
+  .tagline { font-family: "Fraunces", serif; font-style: italic; font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 20px; }
+  #claimSuccess ol { padding-left: 20px; color: var(--text-dim); font-size: 13.5px; }
+  #claimSuccess.hidden, #claimForm.hidden { display: none; }
+  .error-text { color: #c0392b; font-size: 12.5px; margin: 6px 0 0; }
+  .error-text.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="auth-card">
+  <div class="brand-logo" style="margin-bottom: 22px;"><img src="/assets/ecomlense-logo.jpeg" alt="EcomLens"></div>
+
+  <div id="claimForm">
+    <h2 style="margin: 0 0 6px;">Set your password</h2>
+    <p style="color: var(--text-dim); font-size: 13.5px; margin: 0 0 20px;">Use the email and license key from your purchase confirmation email to set a password for your EcomLens account.</p>
+    <form id="claimFormEl">
+      <label class="field-label" for="claimEmail">Email</label>
+      <input class="field-input" id="claimEmail" type="email" autocomplete="email" />
+      <label class="field-label" for="claimKey">License key</label>
+      <input class="field-input claim-key-input" id="claimKey" type="text" placeholder="PROMAX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" />
+      <label class="field-label" for="claimPassword">New password</label>
+      <input class="field-input" id="claimPassword" type="password" autocomplete="new-password" />
+      <label class="field-label" for="claimPasswordConfirm">Confirm password</label>
+      <input class="field-input" id="claimPasswordConfirm" type="password" autocomplete="new-password" />
+      <p id="claimError" class="error-text hidden"></p>
+      <button class="btn btn-primary" id="claimSubmitBtn" type="button" style="margin-top:22px;">Set password</button>
+    </form>
+  </div>
+
+  <div id="claimSuccess" class="hidden">
+    <h2 style="margin: 0 0 6px;">You're all set</h2>
+    <p style="color: var(--text-dim); font-size: 13.5px;">Your password is set. Next:</p>
+    <ol>
+      <li>Download and install the EcomLens desktop app.</li>
+      <li>Open the app and log in with your email and the password you just set.</li>
+    </ol>
+  </div>
+
+  <p class="tagline">EcomLens Pro Max</p>
+</div>
+
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var prefillEmail = params.get('email');
+  var emailInput = document.getElementById('claimEmail');
+  var keyInput = document.getElementById('claimKey');
+  var passInput = document.getElementById('claimPassword');
+  var passConfirmInput = document.getElementById('claimPasswordConfirm');
+  var errorEl = document.getElementById('claimError');
+  var submitBtn = document.getElementById('claimSubmitBtn');
+  var formWrap = document.getElementById('claimForm');
+  var successWrap = document.getElementById('claimSuccess');
+
+  if (prefillEmail) {
+    emailInput.value = prefillEmail;
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.remove('hidden');
+  }
+
+  function clearError() {
+    errorEl.textContent = '';
+    errorEl.classList.add('hidden');
+  }
+
+  submitBtn.addEventListener('click', function () {
+    clearError();
+
+    var email = (emailInput.value || '').trim();
+    var licenseKey = (keyInput.value || '').trim().toUpperCase();
+    var password = passInput.value || '';
+    var passwordConfirm = passConfirmInput.value || '';
+
+    if (!email || !licenseKey || !password || !passwordConfirm) {
+      showError('Please fill in all fields.');
+      return;
+    }
+    if (password.length < 8) {
+      showError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== passwordConfirm) {
+      showError('Passwords do not match.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Setting password...';
+
+    fetch('/api/auth/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, licenseKey: licenseKey, password: password })
+    })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          return { ok: res.ok, body: body };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok || !result.body || result.body.status !== true) {
+          var msg = (result.body && result.body.msg) || 'Something went wrong. Please check your details and try again.';
+          showError(msg);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Set password';
+          return;
+        }
+        formWrap.classList.add('hidden');
+        successWrap.classList.remove('hidden');
+      })
+      .catch(function () {
+        showError('Network error. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Set password';
+      });
+  });
+})();
+</script>
+
+</body>
+</html>
