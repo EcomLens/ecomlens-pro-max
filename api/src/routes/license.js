@@ -2,6 +2,9 @@ const express = require("express");
 const prisma = require("../lib/prisma");
 const razorpay = require("../lib/razorpay");
 const { generateLicenseKey } = require("../lib/licenseKey");
+const { verifyPassword } = require("../lib/passwords");
+const { signDeviceCertificate } = require("../lib/licenseSigning");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
 
@@ -83,6 +86,74 @@ router.post("/activate", async (req, res) => {
     });
 
     return res.json({ status: true, data: { valid: true, activatedAt: license.activatedAt } });
+});
+
+
+// Returns the logged-in account's license(s) for the "My License" web
+// dashboard. Never exposes boundDeviceId directly - just whether it's
+// bound (always 0 or 1 device for now).
+router.get("/me", requireAuth, async (req, res) => {
+    const licenses = await prisma.license.findMany({
+        where: { accountId: req.accountId },
+        orderBy: { createdAt: "desc" },
+    });
+    return res.json({
+        status: true,
+        data: licenses.map((l) => ({
+            id: l.id,
+            key: l.key,
+            status: l.status,
+            activatedAt: l.activatedAt,
+            boundToDevice: !!l.boundDeviceId,
+            boundAt: l.boundAt,
+        })),
+    });
+});
+
+// Called by the desktop app exactly once, the first time it runs on a given
+// computer. Verifies email+password, finds the account's active Pro Max
+// license, and binds it to this device if it isn't bound yet (rejects a
+// second, different device). On success, issues a signed offline
+// certificate - not the raw license key, not a session token - that the
+// app stores locally and verifies itself forever after using the public
+// key baked into the app. No further contact with this server is needed
+// after this one call.
+router.post("/device-login", async (req, res) => {
+    const { email, password, deviceId } = req.body || {};
+    if (!email || !password || !deviceId) {
+        return res.status(400).json({ status: false, msg: "email, password and deviceId are required" });
+    }
+    const account = await prisma.account.findUnique({ where: { email } });
+    if (!account || !verifyPassword(password, account.passwordHash)) {
+        return res.status(401).json({ status: false, msg: "Invalid email or password" });
+    }
+    const license = await prisma.license.findFirst({
+        where: { accountId: account.id, status: "active" },
+        orderBy: { activatedAt: "desc" },
+    });
+    if (!license) {
+        return res.status(403).json({ status: false, msg: "No active EcomLens Pro Max license found for this account" });
+    }
+    if (license.boundDeviceId && license.boundDeviceId !== deviceId) {
+        return res.status(403).json({
+            status: false,
+            msg: "This license is already active on another device. Contact support to transfer it.",
+        });
+    }
+    await prisma.license.update({
+        where: { id: license.id },
+        data: {
+            boundDeviceId: deviceId,
+            boundAt: license.boundAt || new Date(),
+            lastValidatedAt: new Date(),
+        },
+    });
+    const certificate = signDeviceCertificate({
+        accountId: account.id,
+        licenseId: license.id,
+        deviceId,
+    });
+    return res.json({ status: true, data: { certificate } });
 });
 
 module.exports = router;
