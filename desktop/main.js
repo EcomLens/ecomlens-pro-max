@@ -13,7 +13,7 @@ const { dbQueryIPC } = require("./src/ipc/dbQuery.ipc.js")
 const {openFileInExplorerIPC} = require('./src/ipc/fileIO.ipc.js')
 const {loginIPC, singnupIPC} = require('./src/ipc/auth.ipc.js')
 const {registerSettingsIPC} = require('./src/ipc/settings.ipc.js')
-const {activateLicenseIPC, getActivationStatusIPC, revalidateLicenseIfStale} = require('./src/ipc/license.ipc.js')
+const {deviceLoginIPC, getActivationStatusIPC} = require('./src/ipc/license.ipc.js')
 const {getVideoDir} = require('./src/utils/coreUtils/appConfig.coreutils.js')
 const createWindow = function () {
     // macOS relies on the application menu for Cmd+C/Cmd+V/Cmd+Q to work at all,
@@ -62,9 +62,6 @@ function initialiseApp() {
         const isDbInitialised = dbAPI.isDbInitialised();
         console.log("Database Status : ", isDbInitialised ? "Ready." : "Not Ready !")
 
-        // Fire-and-forget - doesn't block startup, doesn't punish the user
-        // for being offline (see revalidateLicenseIfStale for the logic).
-        revalidateLicenseIfStale().catch(err => console.warn("License revalidation error:", err))
 
         return true;
     }   
@@ -79,7 +76,7 @@ ipcMain.handle('login', loginIPC)
 ipcMain.handle('signup', singnupIPC)
 
 // ---- Licensing ----
-ipcMain.handle('activate-license', activateLicenseIPC)
+ipcMain.handle('device-login', deviceLoginIPC)
 ipcMain.handle('get-activation-status', getActivationStatusIPC)
 
 // ---- Recording / video ----
