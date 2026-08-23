@@ -39,4 +39,27 @@ async function sendLicenseEmail({ to, licenseKey }) {
     html,
   });
 }
-module.exports = { sendLicenseEmail };
+// Sends a purchase receipt for a web credits top-up. Used from the admin
+// panel's "resend" action (see admin.js /credits/purchases/:id/resend) when
+// the purchase is already paid - Razorpay itself refuses to re-notify a
+// paid invoice, so this is our own equivalent of sendLicenseEmail() above
+// for the credits product line.
+async function sendCreditPurchaseEmail({ to, credits, amountPaise, currency }) {
+  const amount = ((amountPaise || 0) / 100).toFixed(2);
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; color: #2b2b2b; line-height: 1.6;">
+      <h2 style="margin-bottom: 4px;">Your EcomLens credits purchase</h2>
+      <p>Thanks for your purchase! Here's a summary for your records:</p>
+      <p style="font-size: 18px; font-weight: 700; background: #f5f5f5; padding: 12px 16px; border-radius: 8px; text-align: center;">${credits} credits &mdash; ${currency || "INR"} ${amount}</p>
+      <p>Your credits are already added to your account balance - log in at <a href="https://ecomlens.jynzi.com/app/scan.html">ecomlens.jynzi.com</a> to use them.</p>
+      <p style="color: #6b6b6b; font-size: 13px; margin-top: 32px;">If you didn't make this purchase, please contact support@jynzi.com.</p>
+    </div>
+  `;
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || `"EcomLens" <${process.env.SMTP_USER}>`,
+    to,
+    subject: "Your EcomLens Credits Purchase",
+    html,
+  });
+}
+module.exports = { sendLicenseEmail, sendCreditPurchaseEmail };

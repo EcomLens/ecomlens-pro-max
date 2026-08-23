@@ -2,6 +2,7 @@ const express = require("express");
 const prisma = require("../lib/prisma");
 const razorpay = require("../lib/razorpay");
 const requireAdmin = require("../middleware/requireAdmin");
+const { sendLicenseEmail, sendCreditPurchaseEmail } = require("../lib/mailer");
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -103,13 +104,23 @@ router.get("/invoices", async (req, res) => {
 // Resending to a DIFFERENT email than the original purchase isn't supported
 // here yet; that needs its own email-service integration.
 router.post("/invoices/:id/resend", async (req, res) => {
-    const license = await prisma.license.findUnique({ where: { id: req.params.id } });
+    const license = await prisma.license.findUnique({
+        where: { id: req.params.id },
+        include: { account: { select: { email: true } } },
+    });
     if (!license || !license.razorpayInvoiceId) {
         return res.status(404).json({ status: false, msg: "Invoice not found" });
     }
-
     try {
-        await razorpay.invoices.notifyBy(license.razorpayInvoiceId, "email");
+        if (license.status === "active") {
+            // Razorpay blocks re-notifying an invoice that's already paid
+            // ("Operation not allowed for Invoice in paid status") - for an
+            // active license, resend our own license-key email instead (the
+            // same one the webhook sends on first activation).
+            await sendLicenseEmail({ to: license.account.email, licenseKey: license.key });
+        } else {
+            await razorpay.invoices.notifyBy(license.razorpayInvoiceId, "email");
+        }
         return res.json({ status: true, msg: "Invoice resent" });
     } catch (err) {
         console.error("Error resending invoice:", err);
@@ -212,12 +223,27 @@ router.get("/credits/purchases", async (req, res) => {
     });
 });
 router.post("/credits/purchases/:id/resend", async (req, res) => {
-    const purchase = await prisma.creditPurchase.findUnique({ where: { id: req.params.id } });
+    const purchase = await prisma.creditPurchase.findUnique({
+        where: { id: req.params.id },
+        include: { account: { select: { email: true } } },
+    });
     if (!purchase || !purchase.razorpayInvoiceId) {
         return res.status(404).json({ status: false, msg: "Invoice not found" });
     }
     try {
-        await razorpay.invoices.notifyBy(purchase.razorpayInvoiceId, "email");
+        if (purchase.status === "paid") {
+            // Same Razorpay restriction as the license resend above - a paid
+            // invoice can't be re-notified, so send our own purchase receipt
+            // email instead.
+            await sendCreditPurchaseEmail({
+                to: purchase.account.email,
+                credits: purchase.credits,
+                amountPaise: purchase.amountPaise,
+                currency: purchase.currency,
+            });
+        } else {
+            await razorpay.invoices.notifyBy(purchase.razorpayInvoiceId, "email");
+        }
         return res.json({ status: true, msg: "Invoice resent" });
     } catch (err) {
         console.error("Error resending credit invoice:", err);
