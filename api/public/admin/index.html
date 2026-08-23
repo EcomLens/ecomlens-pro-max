@@ -223,14 +223,14 @@ async function loadInvoices() {
             <td>${inv.activatedAt ? new Date(inv.activatedAt).toLocaleDateString() : "-"}</td>
             <td>${inv.boundDeviceId ? inv.boundDeviceId.slice(0, 12) + "\u2026" : "-"}</td>
             <td>
-                <button class="resend-btn" data-id="${inv.id}" ${!inv.razorpayInvoiceId ? "disabled" : ""}>
+                <button class="invoice-resend-btn resend-btn" data-id="${inv.id}" ${!inv.razorpayInvoiceId ? "disabled" : ""}>
                     Resend
                 </button>
                 ${inv.status !== "refunded" ? `<button class="refund-btn" data-id="${inv.id}" style="background:#8a2c2c;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">Refund</button>` : ""}
             </td>
         </tr>
     `).join("") || `<tr><td colspan="7">No invoices yet.</td></tr>`;
-    document.querySelectorAll(".resend-btn").forEach(btn => {
+    document.querySelectorAll(".invoice-resend-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
             btn.disabled = true;
             btn.textContent = "Sending...";
