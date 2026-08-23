@@ -34,6 +34,8 @@ model CreditPurchase {
   razorpayInvoiceId String?   @unique
   paidAt            DateTime?
   createdAt         DateTime  @default(now())
+  source            String    @default("purchase") // purchase | admin_grant
+  note              String?
 }
 
 // One row per desktop Pro Max purchase attempt. Created in "pending" state
@@ -46,7 +48,7 @@ model License {
   key                String    @unique
   accountId          String
   account            Account   @relation(fields: [accountId], references: [id])
-  status             String    @default("pending") // pending | active | revoked
+  status             String    @default("pending") // pending | active | revoked | refunded
   razorpayInvoiceId  String?   @unique
   amountPaise        Int?
   currency           String    @default("INR")
@@ -55,6 +57,8 @@ model License {
   boundDeviceId    String?
   boundAt    DateTime?
   createdAt          DateTime  @default(now())
+  refundedAt         DateTime?
+  refundReason       String?
 }
 
 // Metadata only, logged by the web app after each recording - the video

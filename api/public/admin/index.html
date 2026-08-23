@@ -28,6 +28,7 @@
     .badge.active { background: #dff6e0; color: #1a7f37; }
     .badge.pending { background: #fff3d6; color: #9a6700; }
     .badge.revoked { background: #fde2e1; color: #b3261e; }
+    .badge.refunded { background: #ece6f7; color: #5b3a9e; }
     .resend-btn { background: #2B4570; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
     .resend-btn:disabled { background: #ccc; cursor: not-allowed; }
     .hidden { display: none; }
@@ -50,7 +51,41 @@
     </header>
     <main>
         <div class="cards" id="summaryCards"></div>
-
+        <div class="cards" id="creditSummaryCards"></div>
+        <section>
+            <h2>Customers</h2>
+            <table>
+                <thead><tr><th>Customer</th><th>Email</th><th>Desktop license</th><th>Credit balance</th><th>Credits acquired</th><th>Credit revenue</th><th>Joined</th></tr></thead>
+                <tbody id="customersBody"></tbody>
+            </table>
+        </section>
+        <section>
+            <h2>Grant free credits</h2>
+            <p id="grantError" class="error hidden"></p>
+            <p id="grantSuccess" class="hidden" style="color:#1a7f37;font-size:13px;margin-bottom:8px;"></p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                <div>
+                    <label style="display:block;font-size:12px;color:#7A756A;margin-bottom:4px;">Customer email</label>
+                    <input id="grantEmail" type="email" placeholder="customer@email.com" style="padding:8px;border:1px solid #ddd;border-radius:6px;width:220px;" />
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;color:#7A756A;margin-bottom:4px;">Credits</label>
+                    <input id="grantCredits" type="number" min="1" step="1" placeholder="100" style="padding:8px;border:1px solid #ddd;border-radius:6px;width:100px;" />
+                </div>
+                <div style="flex:1;min-width:200px;">
+                    <label style="display:block;font-size:12px;color:#7A756A;margin-bottom:4px;">Reason (optional)</label>
+                    <input id="grantNote" type="text" placeholder="e.g. goodwill after support issue" style="padding:8px;border:1px solid #ddd;border-radius:6px;width:100%;" />
+                </div>
+                <button id="grantBtn" class="resend-btn" style="padding:8px 16px;">Grant credits</button>
+            </div>
+        </section>
+        <section>
+            <h2>Credit purchases</h2>
+            <table>
+                <thead><tr><th>Customer</th><th>Credits</th><th>Status</th><th>Source</th><th>Amount</th><th>Created</th><th>Paid</th><th></th></tr></thead>
+                <tbody id="creditPurchasesBody"></tbody>
+            </table>
+        </section>
         <section>
             <h2>Revenue by customer</h2>
             <table>
@@ -70,7 +105,7 @@
         <section>
             <h2>Invoices</h2>
             <table>
-                <thead><tr><th>Customer</th><th>Status</th><th>Amount</th><th>Created</th><th>Activated</th><th></th></tr></thead>
+                <thead><tr><th>Customer</th><th>Status</th><th>Amount</th><th>Created</th><th>Activated</th><th>Device bound</th><th></th></tr></thead>
                 <tbody id="invoicesBody"></tbody>
             </table>
         </section>
@@ -93,8 +128,12 @@ async function apiGet(path) {
     return res.json();
 }
 
-async function apiPost(path) {
-    const res = await fetch(`${API_BASE}${path}`, { method: "POST", headers: { Authorization: `Bearer ${getToken()}` } });
+async function apiPost(path, body) {
+    const res = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}`, "Content-Type": "application/json" },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
     return res.json();
 }
 
@@ -182,14 +221,15 @@ async function loadInvoices() {
             <td>${formatMoney(inv.amountPaise, inv.currency)}</td>
             <td>${new Date(inv.createdAt).toLocaleDateString()}</td>
             <td>${inv.activatedAt ? new Date(inv.activatedAt).toLocaleDateString() : "-"}</td>
+            <td>${inv.boundDeviceId ? inv.boundDeviceId.slice(0, 12) + "\u2026" : "-"}</td>
             <td>
                 <button class="resend-btn" data-id="${inv.id}" ${!inv.razorpayInvoiceId ? "disabled" : ""}>
                     Resend
                 </button>
+                ${inv.status !== "refunded" ? `<button class="refund-btn" data-id="${inv.id}" style="background:#8a2c2c;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">Refund</button>` : ""}
             </td>
         </tr>
-    `).join("") || `<tr><td colspan="6">No invoices yet.</td></tr>`;
-
+    `).join("") || `<tr><td colspan="7">No invoices yet.</td></tr>`;
     document.querySelectorAll(".resend-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
             btn.disabled = true;
@@ -200,13 +240,114 @@ async function loadInvoices() {
             else btn.disabled = false;
         });
     });
+    document.querySelectorAll(".refund-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const reason = prompt("Reason for refund (optional):") || "";
+            if (!confirm("Mark this license as refunded? This only records it here - it does not process the actual Razorpay refund.")) return;
+            btn.disabled = true;
+            const result = await apiPost(`/api/admin/licenses/${btn.dataset.id}/refund`, { reason });
+            if (result.status) { loadInvoices(); loadCustomers(); }
+            else { alert(result.msg || "Failed to mark refunded"); btn.disabled = false; }
+        });
+    });
 }
 
+async function loadCreditSummary() {
+    const { data } = await apiGet("/api/admin/credits/summary");
+    const cards = [
+        ["Credits sold", data.totalCreditsSold],
+        ["Credit revenue", formatMoney(data.totalCreditRevenuePaise, "INR")],
+        ["Free credits granted", data.totalFreeCreditsGranted],
+        ["Accounts with balance", data.accountsWithCredits],
+    ];
+    document.getElementById("creditSummaryCards").innerHTML = cards.map(([label, value]) =>
+        `<div class="card"><div class="label">${label}</div><div class="value">${value}</div></div>`
+    ).join("");
+}
+async function loadCustomers() {
+    const { data } = await apiGet("/api/admin/customers");
+    document.getElementById("customersBody").innerHTML = data.map(c => `
+        <tr>
+            <td>${c.name || "-"}</td>
+            <td>${c.email}</td>
+            <td><span class="badge ${c.licenseStatus === "none" ? "pending" : c.licenseStatus}">${c.licenseStatus}</span></td>
+            <td>${c.creditBalance}</td>
+            <td>${c.totalCreditsAcquired}</td>
+            <td>${formatMoney(c.totalCreditRevenuePaise, "INR")}</td>
+            <td>${new Date(c.createdAt).toLocaleDateString()}</td>
+        </tr>
+    `).join("") || `<tr><td colspan="7">No customers yet.</td></tr>`;
+}
+async function loadCreditPurchases() {
+    const { data } = await apiGet("/api/admin/credits/purchases");
+    document.getElementById("creditPurchasesBody").innerHTML = data.map(p => `
+        <tr>
+            <td>${p.customerName || p.customerEmail}</td>
+            <td>${p.credits}</td>
+            <td><span class="badge ${p.status}">${p.status}</span></td>
+            <td>${p.source === "admin_grant" ? "Free grant" : "Purchase"}${p.note ? ` <span style="color:#7A756A;">(${p.note})</span>` : ""}</td>
+            <td>${formatMoney(p.amountPaise, p.currency)}</td>
+            <td>${new Date(p.createdAt).toLocaleDateString()}</td>
+            <td>${p.paidAt ? new Date(p.paidAt).toLocaleDateString() : "-"}</td>
+            <td>
+                <button class="credit-resend-btn resend-btn" data-id="${p.id}" ${!p.razorpayInvoiceId ? "disabled" : ""}>
+                    Resend
+                </button>
+            </td>
+        </tr>
+    `).join("") || `<tr><td colspan="8">No credit purchases yet.</td></tr>`;
+    document.querySelectorAll(".credit-resend-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            btn.textContent = "Sending...";
+            const result = await apiPost(`/api/admin/credits/purchases/${btn.dataset.id}/resend`);
+            btn.textContent = result.status ? "Sent" : "Failed";
+            if (result.status) setTimeout(() => { btn.textContent = "Resend"; btn.disabled = false; }, 2000);
+            else btn.disabled = false;
+        });
+    });
+}
+document.getElementById("grantBtn").addEventListener("click", async () => {
+    const email = document.getElementById("grantEmail").value.trim();
+    const credits = document.getElementById("grantCredits").value.trim();
+    const note = document.getElementById("grantNote").value.trim();
+    const errorEl = document.getElementById("grantError");
+    const successEl = document.getElementById("grantSuccess");
+    errorEl.classList.add("hidden");
+    successEl.classList.add("hidden");
+    if (!email || !credits) {
+        errorEl.textContent = "Email and credits are required.";
+        errorEl.classList.remove("hidden");
+        return;
+    }
+    const btn = document.getElementById("grantBtn");
+    btn.disabled = true;
+    btn.textContent = "Granting...";
+    const result = await apiPost("/api/admin/credits/grant", { email, credits, note });
+    btn.disabled = false;
+    btn.textContent = "Grant credits";
+    if (!result.status) {
+        errorEl.textContent = result.msg || "Failed to grant credits";
+        errorEl.classList.remove("hidden");
+        return;
+    }
+    successEl.textContent = `Granted. New balance: ${result.data.creditBalance} credits.`;
+    successEl.classList.remove("hidden");
+    document.getElementById("grantEmail").value = "";
+    document.getElementById("grantCredits").value = "";
+    document.getElementById("grantNote").value = "";
+    loadCustomers();
+    loadCreditSummary();
+    loadCreditPurchases();
+});
 function loadAll() {
     loadSummary();
+    loadCreditSummary();
+    loadCustomers();
     loadByCustomer();
     loadByDay();
     loadInvoices();
+    loadCreditPurchases();
 }
 
 if (getToken()) {
