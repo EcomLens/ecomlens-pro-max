@@ -16,22 +16,23 @@ router.post("/", async (req, res) => {
     }
 
     try {
-        const recording = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
             const account = await tx.account.findUnique({ where: { id: req.accountId } });
             if (!account || account.creditBalance <= 0) {
                 throw new Error("NO_CREDITS");
             }
-            await tx.account.update({
+            const updatedAccount = await tx.account.update({
                 where: { id: req.accountId },
                 data: { creditBalance: { decrement: 1 } },
             });
-            return tx.recording.create({ data: { accountId: req.accountId, barcode } });
+            const recording = await tx.recording.create({ data: { accountId: req.accountId, barcode } });
+            return { recording, creditBalance: updatedAccount.creditBalance };
         });
 
-        res.json({ status: true, data: recording });
+        res.json({ status: true, data: result.recording, creditBalance: result.creditBalance });
     } catch (err) {
         if (err.message === "NO_CREDITS") {
-            return res.status(402).json({ status: false, msg: "No credits remaining. Please top up to continue recording." });
+            return res.status(402).json({ status: false, msg: "No credits remaining. Please top up to continue recording.", creditBalance: 0 });
         }
         console.error("Error creating recording:", err);
         return res.status(500).json({ status: false, msg: "Unable to save recording" });

@@ -17,6 +17,11 @@
     padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px;
   }
   .header-right button:hover { border-color: var(--gold); color: var(--gold); }
+  .credit-badge {
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; background: rgba(255,255,255,0.1);
+    color: var(--gold); padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .credit-badge.zero { color: #E06155; }
 
   main { display: flex; gap: 16px; padding: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; flex-wrap: wrap; }
   .scan-col { flex: 1 1 520px; min-width: 320px; }
@@ -64,6 +69,36 @@
   .recent-item { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
   .recent-item .rb { font-family: "IBM Plex Mono", monospace; }
   .recent-item .rd { color: rgba(255,253,247,0.55); font-size: 11.5px; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(13,13,13,0.5);
+    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 60;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    position: relative; width: 100%; max-width: 400px; background: var(--bg-raised);
+    border-radius: 14px; padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--line);
+  }
+  .modal h3 { font-size: 21px; margin-top: 8px; }
+  .modal-sub { font-size: 13.5px; color: var(--fg-muted); margin-top: 10px; }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%;
+    border: none; background: transparent; color: var(--fg-muted); font-size: 20px; line-height: 1; cursor: pointer;
+  }
+  .modal-close:hover { background: var(--bg-sunken); color: var(--fg); }
+  .modal-error { color: #C0392B; font-size: 13px; margin-top: 12px; }
+  .modal-error.hidden, #creditsModalSuccess.hidden, #creditsModalPackages.hidden { display: none; }
+  .package-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .package-btn {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    padding: 14px 16px; border-radius: 10px; border: 1px solid var(--line-strong);
+    background: var(--bg); color: var(--fg); font-family: inherit; font-size: 14.5px; cursor: pointer;
+    text-align: left;
+  }
+  .package-btn:hover { border-color: var(--accent); }
+  .package-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .package-credits { font-weight: 600; }
+  .package-price { font-family: "IBM Plex Mono", monospace; color: var(--fg-muted); }
 </style>
 </head>
 <body>
@@ -71,6 +106,8 @@
 <header>
   <div class="brand-logo"><img src="/assets/ecomlense-logo.jpeg" alt="EcomLens"></div>
   <div class="header-right">
+    <span id="creditBadge" class="credit-badge">Credits: &mdash;</span>
+    <button id="buyCreditsBtn" type="button">Buy Credits</button>
     <span id="userLabel"></span>
     <button id="logoutBtn" type="button">Log out</button>
   </div>
@@ -110,6 +147,39 @@
   </div>
 </main>
 
+<div id="creditsModal" class="modal-overlay hidden">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="creditsModalTitle">
+    <button class="modal-close" id="creditsModalClose" type="button" aria-label="Close">&times;</button>
+    <div id="creditsModalPackages">
+      <p class="eyebrow">Web &mdash; Pay per scan</p>
+      <h3 id="creditsModalTitle">Buy credits</h3>
+      <p class="modal-sub">Rs.1.50 per scan &middot; credits never expire. Pick a package &mdash; we'll email you an invoice, or pay right now on the next screen.</p>
+      <div class="package-list">
+        <button class="package-btn" data-package="starter" type="button">
+          <span class="package-credits">100 credits</span>
+          <span class="package-price">Rs.150</span>
+        </button>
+        <button class="package-btn" data-package="standard" type="button">
+          <span class="package-credits">500 credits</span>
+          <span class="package-price">Rs.750</span>
+        </button>
+        <button class="package-btn" data-package="bulk" type="button">
+          <span class="package-credits">1000 credits</span>
+          <span class="package-price">Rs.1500</span>
+        </button>
+      </div>
+      <p id="creditsError" class="modal-error hidden"></p>
+    </div>
+    <div id="creditsModalSuccess" class="hidden">
+      <p class="eyebrow">Invoice sent</p>
+      <h3>Check your inbox</h3>
+      <p class="modal-sub">We've generated an invoice &mdash; pay it to add credits to your account. You can also pay right now:</p>
+      <a class="btn btn-primary" id="creditsInvoiceLink" href="#" target="_blank" rel="noopener" style="width:100%; text-align:center;">Pay the invoice</a>
+      <p class="modal-sub" style="margin-top:14px;">Your balance updates automatically once payment is confirmed &mdash; reopen this after paying to see it refreshed.</p>
+    </div>
+  </div>
+</div>
+
 <script>
 // ---- Auth guard ----
 const token = localStorage.getItem("ecomlensToken");
@@ -129,6 +199,72 @@ async function api(path, options = {}) {
   });
   return res.json();
 }
+
+// ---- Credits ----
+let creditBalance = null;
+const creditBadge = document.getElementById("creditBadge");
+const buyCreditsBtn = document.getElementById("buyCreditsBtn");
+
+function updateCreditBadge() {
+  if (creditBalance === null) { creditBadge.textContent = "Credits: \u2014"; return; }
+  creditBadge.textContent = `${creditBalance} credit${creditBalance === 1 ? "" : "s"}`;
+  creditBadge.classList.toggle("zero", creditBalance <= 0);
+}
+
+async function loadCredits() {
+  const body = await api("/api/credits/me");
+  creditBalance = body?.data?.creditBalance ?? 0;
+  updateCreditBadge();
+}
+
+buyCreditsBtn.addEventListener("click", () => window.openCreditsModal());
+creditBadge.addEventListener("click", loadCredits);
+
+(function () {
+  const overlay = document.getElementById("creditsModal");
+  const closeBtn = document.getElementById("creditsModalClose");
+  const packagesView = document.getElementById("creditsModalPackages");
+  const successView = document.getElementById("creditsModalSuccess");
+  const errorEl = document.getElementById("creditsError");
+  const invoiceLink = document.getElementById("creditsInvoiceLink");
+  const packageBtns = document.querySelectorAll(".package-btn");
+
+  window.openCreditsModal = function () {
+    overlay.classList.remove("hidden");
+    packagesView.classList.remove("hidden");
+    successView.classList.add("hidden");
+    errorEl.classList.add("hidden");
+  };
+  function closeModal() { overlay.classList.add("hidden"); }
+  closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+
+  packageBtns.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      errorEl.classList.add("hidden");
+      packageBtns.forEach((b) => (b.disabled = true));
+      try {
+        const body = await api("/api/credits/purchase", {
+          method: "POST",
+          body: JSON.stringify({ package: btn.dataset.package }),
+        });
+        if (!body.status) {
+          errorEl.textContent = body.msg || "Something went wrong. Please try again.";
+          errorEl.classList.remove("hidden");
+          return;
+        }
+        invoiceLink.href = body.data.invoiceUrl;
+        packagesView.classList.add("hidden");
+        successView.classList.remove("hidden");
+      } catch (err) {
+        errorEl.textContent = "Couldn't reach the server. Please try again.";
+        errorEl.classList.remove("hidden");
+      } finally {
+        packageBtns.forEach((b) => (b.disabled = false));
+      }
+    });
+  });
+})();
 
 // ---- Persistent recording state ----
 let recorder, stream, chunks = [];
@@ -259,7 +395,15 @@ async function initCamera() {
       const safe = sanitize(activeBarcode);
       const filename = `${safe}_${activeStartTs}`;
       saveRecordingLocally(blob, filename);
-      await api("/api/recordings", { method: "POST", body: JSON.stringify({ barcode: activeBarcode }) });
+      const logResult = await api("/api/recordings", { method: "POST", body: JSON.stringify({ barcode: activeBarcode }) });
+      if (typeof logResult.creditBalance === "number") {
+        creditBalance = logResult.creditBalance;
+        updateCreditBadge();
+      }
+      if (!logResult.status) {
+        document.getElementById("scanInfo").textContent = logResult.msg || "Couldn't log this recording \u2014 check your credits.";
+        if (creditBalance !== null && creditBalance <= 0) window.openCreditsModal();
+      }
       loadRecent();
     }
 
@@ -317,6 +461,13 @@ function startRecordingForBarcode(barcode) {
 function finalizeScan(scan) {
   if (!scan) return;
   if (!recorder) return;
+
+  if (!isRecording && creditBalance !== null && creditBalance <= 0) {
+    document.getElementById("scanInfo").textContent = "Out of credits \u2014 buy more to continue recording.";
+    speak("Out of credits. Buy more to keep recording.");
+    window.openCreditsModal();
+    return;
+  }
 
   barcodeInput.value = scan;
 
@@ -387,6 +538,7 @@ async function loadRecent() {
 
 tryInitCamera();
 loadRecent();
+loadCredits();
 </script>
 </body>
 </html>
