@@ -28,7 +28,24 @@ router.post("/razorpay", async (req, res) => {
                 include: { account: true },
             });
             if (!license) {
-                console.warn("No matching license for paid invoice:", invoice.id);
+                const creditPurchase = await prisma.creditPurchase.findUnique({
+                    where: { razorpayInvoiceId: invoice.id },
+                });
+                if (!creditPurchase) {
+                    console.warn("No matching license or credit purchase for paid invoice:", invoice.id);
+                } else if (creditPurchase.status !== "paid") {
+                    await prisma.$transaction([
+                        prisma.creditPurchase.update({
+                            where: { id: creditPurchase.id },
+                            data: { status: "paid", paidAt: new Date() },
+                        }),
+                        prisma.account.update({
+                            where: { id: creditPurchase.accountId },
+                            data: { creditBalance: { increment: creditPurchase.credits } },
+                        }),
+                    ]);
+                    console.log("Credits added:", creditPurchase.credits, "to account", creditPurchase.accountId);
+                }
             } else if (license.status !== "active") {
                 await prisma.license.update({
                     where: { id: license.id },

@@ -11,14 +11,29 @@ datasource db {
 }
 
 model Account {
-  id           String      @id @default(cuid())
-  email        String      @unique
-  passwordHash String
-  name         String?
-  isAdmin      Boolean     @default(false)
-  createdAt    DateTime    @default(now())
-  licenses     License[]
-  recordings   Recording[]
+  id              String           @id @default(cuid())
+  email           String           @unique
+  passwordHash    String
+  name            String?
+  isAdmin         Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  licenses        License[]
+  recordings      Recording[]
+  creditBalance   Int              @default(0)
+  creditPurchases CreditPurchase[]
+}
+
+model CreditPurchase {
+  id                String    @id @default(cuid())
+  accountId         String
+  account           Account   @relation(fields: [accountId], references: [id])
+  credits           Int
+  amountPaise       Int
+  currency          String    @default("INR")
+  status            String    @default("pending") // pending | paid
+  razorpayInvoiceId String?   @unique
+  paidAt            DateTime?
+  createdAt         DateTime  @default(now())
 }
 
 // One row per desktop Pro Max purchase attempt. Created in "pending" state
