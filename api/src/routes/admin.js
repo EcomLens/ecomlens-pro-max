@@ -145,6 +145,26 @@ router.post("/licenses/:id/refund", async (req, res) => {
     });
     return res.json({ status: true, data: updated });
 });
+// Clears a license's device binding so the customer can activate it on a
+// different computer. There was previously no way to do this at all short
+// of a direct database edit - needed for the legitimate case of a customer
+// switching machines (old PC died, upgraded, etc.), not just for abuse.
+// Doesn't touch license status/refund fields, and doesn't itself notify the
+// customer - they just need to log in again on the new device afterward.
+router.post("/licenses/:id/unbind-device", async (req, res) => {
+    const license = await prisma.license.findUnique({ where: { id: req.params.id } });
+    if (!license) {
+        return res.status(404).json({ status: false, msg: "License not found" });
+    }
+    if (!license.boundDeviceId) {
+        return res.status(400).json({ status: false, msg: "This license isn't bound to a device" });
+    }
+    const updated = await prisma.license.update({
+        where: { id: license.id },
+        data: { boundDeviceId: null, boundAt: null },
+    });
+    return res.json({ status: true, data: updated });
+});
 // Combined per-customer view across both revenue lines (desktop license +
 // web credits) - the single-pane view the separate /revenue/by-customer and
 // credits endpoints don't give on their own.

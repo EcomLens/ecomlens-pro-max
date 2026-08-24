@@ -465,6 +465,16 @@ footer {
 .footer-links a { text-decoration: none; color: var(--fg-muted); }
 .footer-links a:hover { color: var(--accent); }
 .footer-note { font-size: 12.5px; color: var(--fg-muted); font-family: "IBM Plex Mono", monospace; margin-top: 18px; }
+/* This page doesn't link brand.css (it's fully self-contained), so the
+   .jynzi-chip rule added there for other pages needs its own copy here too -
+   without it the Jynzi logo <img> has no size constraint at all and renders
+   at its full native resolution. */
+.jynzi-chip {
+  display: inline-flex; align-items: center; gap: 0;
+  background: #1c1a15; padding: 4px 10px; border-radius: 6px;
+  vertical-align: middle;
+}
+.jynzi-chip img { height: 14px; width: auto; display: block; }
 </style>
 </head>
 <body>

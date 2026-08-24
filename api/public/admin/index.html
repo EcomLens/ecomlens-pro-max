@@ -227,6 +227,7 @@ async function loadInvoices() {
                     Resend
                 </button>
                 ${inv.status !== "refunded" ? `<button class="refund-btn" data-id="${inv.id}" style="background:#8a2c2c;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">Refund</button>` : ""}
+                ${inv.boundDeviceId ? `<button class="unbind-device-btn" data-id="${inv.id}" style="background:#5b3a9e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">Unbind device</button>` : ""}
             </td>
         </tr>
     `).join("") || `<tr><td colspan="7">No invoices yet.</td></tr>`;
@@ -248,6 +249,15 @@ async function loadInvoices() {
             const result = await apiPost(`/api/admin/licenses/${btn.dataset.id}/refund`, { reason });
             if (result.status) { loadInvoices(); loadCustomers(); }
             else { alert(result.msg || "Failed to mark refunded"); btn.disabled = false; }
+        });
+    });
+    document.querySelectorAll(".unbind-device-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            if (!confirm("Unbind this license from its current device? The customer will be able to activate it on a different computer next time they log in.")) return;
+            btn.disabled = true;
+            const result = await apiPost(`/api/admin/licenses/${btn.dataset.id}/unbind-device`);
+            if (result.status) { loadInvoices(); }
+            else { alert(result.msg || "Failed to unbind device"); btn.disabled = false; }
         });
     });
 }
