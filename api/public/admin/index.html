@@ -55,7 +55,7 @@
         <section>
             <h2>Customers</h2>
             <table>
-                <thead><tr><th>Customer</th><th>Email</th><th>Desktop license</th><th>Credit balance</th><th>Credits acquired</th><th>Credit revenue</th><th>Joined</th></tr></thead>
+                <thead><tr><th>Customer</th><th>Email</th><th>Desktop license</th><th>Credit balance</th><th>Credits acquired</th><th>Credit revenue</th><th>Joined</th><th>Admin</th></tr></thead>
                 <tbody id="customersBody"></tbody>
             </table>
         </section>
@@ -275,8 +275,28 @@ async function loadCustomers() {
             <td>${c.totalCreditsAcquired}</td>
             <td>${formatMoney(c.totalCreditRevenuePaise, "INR")}</td>
             <td>${new Date(c.createdAt).toLocaleDateString()}</td>
+            <td>
+                ${c.isAdmin ? `<span class="badge active" style="margin-right:6px;">Admin</span>` : ""}
+                <button class="toggle-admin-btn resend-btn" data-id="${c.id}" style="${c.isAdmin ? "background:#8a2c2c;" : ""}">
+                    ${c.isAdmin ? "Remove admin" : "Make admin"}
+                </button>
+            </td>
         </tr>
-    `).join("") || `<tr><td colspan="7">No customers yet.</td></tr>`;
+    `).join("") || `<tr><td colspan="8">No customers yet.</td></tr>`;
+    document.querySelectorAll(".toggle-admin-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const makingAdmin = btn.textContent.trim() === "Make admin";
+            if (!confirm(makingAdmin ? "Grant this account admin dashboard access?" : "Remove this account's admin dashboard access?")) return;
+            btn.disabled = true;
+            const result = await apiPost(`/api/admin/accounts/${btn.dataset.id}/toggle-admin`);
+            btn.disabled = false;
+            if (result.status) {
+                loadCustomers();
+            } else {
+                alert(result.msg || "Failed to update admin access");
+            }
+        });
+    });
 }
 async function loadCreditPurchases() {
     const { data } = await apiGet("/api/admin/credits/purchases");

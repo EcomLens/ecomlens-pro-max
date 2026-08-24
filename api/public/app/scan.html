@@ -12,11 +12,12 @@
     display: flex; align-items: center; justify-content: space-between;
   }
   .header-right { display: flex; align-items: center; gap: 16px; font-size: 13.5px; }
-  .header-right button {
+  .header-right button, .header-right a.header-btn {
     background: transparent; border: 1px solid rgba(255,253,247,0.3); color: var(--cream);
     padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px;
+    text-decoration: none; display: inline-block;
   }
-  .header-right button:hover { border-color: var(--gold); color: var(--gold); }
+  .header-right button:hover, .header-right a.header-btn:hover { border-color: var(--gold); color: var(--gold); }
   .credit-badge {
     font-family: "IBM Plex Mono", monospace; font-size: 12.5px; background: rgba(255,255,255,0.1);
     color: var(--gold); padding: 4px 10px; border-radius: 999px; cursor: pointer;
@@ -108,6 +109,7 @@
   <div class="header-right">
     <span id="creditBadge" class="credit-badge">Credits: &mdash;</span>
     <button id="buyCreditsBtn" type="button">Buy Credits</button>
+    <a href="/app/account.html" class="header-btn">My Account</a>
     <span id="userLabel"></span>
     <button id="logoutBtn" type="button">Log out</button>
   </div>

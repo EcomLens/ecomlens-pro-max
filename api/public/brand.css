@@ -16,7 +16,94 @@
   --cream-dark: #F2EAD9;
   --text-dim: #7A756A;
   --text-body: #3A3A3A;
+
+  /* Extended semantic tokens (light-mode default, dark-mode-aware). These
+     started out duplicated inline inside index.html's own <style> block and
+     were missing entirely from pages that only link this stylesheet (e.g.
+     scan.html's Buy Credits modal referenced --bg-raised/--fg-muted/--line/
+     --shadow with nothing defining them anywhere on that page - an invisible
+     bug since undefined custom properties silently fall back to each
+     property's own initial value rather than erroring). Centralized here so
+     every page that links brand.css gets a consistent, correct set. */
+  --bg: var(--cream);
+  --bg-raised: #FFFFFF;
+  --bg-sunken: var(--cream-dark);
+  --fg: var(--ink);
+  --fg-muted: var(--text-dim);
+  --fg-body: var(--text-body);
+  --accent: var(--navy);
+  --accent-contrast: var(--cream);
+  --gold-fg: var(--ink);
+  --line: rgba(13,13,13,0.10);
+  --line-strong: rgba(13,13,13,0.18);
+  --card-desktop-bg: var(--navy-dark);
+  --card-desktop-fg: var(--cream);
+  --shadow: 0 1px 2px rgba(13,13,13,0.04), 0 8px 24px rgba(13,13,13,0.06);
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10192B;
+    --bg-raised: #16233A;
+    --bg-sunken: #0D1524;
+    --fg: #F6F2E8;
+    --fg-muted: #A9A497;
+    --fg-body: #DCD7CB;
+    --accent: #F5C518;
+    --accent-contrast: #16233A;
+    --gold-fg: #0D0D0D;
+    --line: rgba(246,242,232,0.10);
+    --line-strong: rgba(246,242,232,0.20);
+    --card-desktop-bg: #0D1524;
+    --card-desktop-fg: #F6F2E8;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.35);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10192B;
+  --bg-raised: #16233A;
+  --bg-sunken: #0D1524;
+  --fg: #F6F2E8;
+  --fg-muted: #A9A497;
+  --fg-body: #DCD7CB;
+  --accent: #F5C518;
+  --accent-contrast: #16233A;
+  --gold-fg: #0D0D0D;
+  --line: rgba(246,242,232,0.10);
+  --line-strong: rgba(246,242,232,0.20);
+  --card-desktop-bg: #0D1524;
+  --card-desktop-fg: #F6F2E8;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.35);
+}
+:root[data-theme="light"] {
+  --bg: var(--cream);
+  --bg-raised: #FFFFFF;
+  --bg-sunken: var(--cream-dark);
+  --fg: var(--ink);
+  --fg-muted: var(--text-dim);
+  --fg-body: var(--text-body);
+  --accent: var(--navy);
+  --accent-contrast: var(--cream);
+  --gold-fg: var(--ink);
+  --line: rgba(13,13,13,0.10);
+  --line-strong: rgba(13,13,13,0.18);
+  --card-desktop-bg: var(--navy-dark);
+  --card-desktop-fg: var(--cream);
+  --shadow: 0 1px 2px rgba(13,13,13,0.04), 0 8px 24px rgba(13,13,13,0.06);
+}
+
+/* Reusable header/footer chip for cross-linking to the Jynzi parent brand
+   from a product site's light-background nav/footer. jynzi-logo.png is a
+   white-text wordmark meant for a dark background - this wraps it in one so
+   it stays legible instead of blending into a light footer. Previously
+   inlined ad hoc wherever the link appeared; centralized so every product
+   site gets identical spacing/alignment. */
+.jynzi-chip {
+  display: inline-flex; align-items: center; gap: 0;
+  background: #1c1a15; padding: 4px 10px; border-radius: 6px;
+  vertical-align: middle;
+}
+.jynzi-chip img { height: 14px; width: auto; display: block; }
 
 * { box-sizing: border-box; }
 body {

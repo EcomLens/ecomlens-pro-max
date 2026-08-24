@@ -179,6 +179,27 @@ router.get("/customers", async (req, res) => {
     });
     res.json({ status: true, data });
 });
+// Grants or revokes admin dashboard access for an account. Previously the
+// only way to do this at all was a direct database update run by hand on
+// the VPS (see ops notes) - this is the first real UI for it. Blocks an
+// admin from revoking their OWN access via this route, specifically to
+// avoid a single-admin business accidentally locking itself out of the
+// dashboard with no other way back in; a second admin can still remove the
+// first admin's access if there's ever a real reason to.
+router.post("/accounts/:id/toggle-admin", async (req, res) => {
+    const account = await prisma.account.findUnique({ where: { id: req.params.id } });
+    if (!account) {
+        return res.status(404).json({ status: false, msg: "Account not found" });
+    }
+    if (account.id === req.accountId && account.isAdmin) {
+        return res.status(400).json({ status: false, msg: "You can't remove your own admin access" });
+    }
+    const updated = await prisma.account.update({
+        where: { id: account.id },
+        data: { isAdmin: !account.isAdmin },
+    });
+    return res.json({ status: true, data: { id: updated.id, isAdmin: updated.isAdmin } });
+});
 // Credit KPIs, mirroring the desktop /summary shape. admin_grant rows are
 // excluded from revenue so free credits never inflate reported income.
 router.get("/credits/summary", async (req, res) => {
