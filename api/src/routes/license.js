@@ -134,19 +134,24 @@ router.post("/device-login", async (req, res) => {
     if (!license) {
         return res.status(403).json({ status: false, msg: "No active EcomLens Pro Max license found for this account" });
     }
-    if (license.boundDeviceId && license.boundDeviceId !== deviceId) {
+    if (!license.unlimitedDevices && license.boundDeviceId && license.boundDeviceId !== deviceId) {
         return res.status(403).json({
             status: false,
             msg: "This license is already active on another device. Contact support to transfer it.",
         });
     }
+    // unlimitedDevices licenses (admin-only, internal use) skip binding
+    // entirely - boundDeviceId/boundAt are left untouched since there's no
+    // single "the device" to record once more than one is active at once.
     await prisma.license.update({
         where: { id: license.id },
-        data: {
-            boundDeviceId: deviceId,
-            boundAt: license.boundAt || new Date(),
-            lastValidatedAt: new Date(),
-        },
+        data: license.unlimitedDevices
+            ? { lastValidatedAt: new Date() }
+            : {
+                  boundDeviceId: deviceId,
+                  boundAt: license.boundAt || new Date(),
+                  lastValidatedAt: new Date(),
+              },
     });
     const certificate = signDeviceCertificate({
         accountId: account.id,

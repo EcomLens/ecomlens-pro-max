@@ -221,13 +221,16 @@ async function loadInvoices() {
             <td>${formatMoney(inv.amountPaise, inv.currency)}</td>
             <td>${new Date(inv.createdAt).toLocaleDateString()}</td>
             <td>${inv.activatedAt ? new Date(inv.activatedAt).toLocaleDateString() : "-"}</td>
-            <td>${inv.boundDeviceId ? inv.boundDeviceId.slice(0, 12) + "\u2026" : "-"}</td>
+            <td>${inv.unlimitedDevices ? `<span class="badge active">Unlimited</span>` : (inv.boundDeviceId ? inv.boundDeviceId.slice(0, 12) + "\u2026" : "-")}</td>
             <td>
                 <button class="invoice-resend-btn resend-btn" data-id="${inv.id}" ${!inv.razorpayInvoiceId ? "disabled" : ""}>
                     Resend
                 </button>
                 ${inv.status !== "refunded" ? `<button class="refund-btn" data-id="${inv.id}" style="background:#8a2c2c;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">Refund</button>` : ""}
-                ${inv.boundDeviceId ? `<button class="unbind-device-btn" data-id="${inv.id}" style="background:#5b3a9e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">Unbind device</button>` : ""}
+                ${(inv.boundDeviceId && !inv.unlimitedDevices) ? `<button class="unbind-device-btn" data-id="${inv.id}" style="background:#5b3a9e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">Unbind device</button>` : ""}
+                <button class="toggle-unlimited-btn" data-id="${inv.id}" style="background:${inv.unlimitedDevices ? "#8a2c2c" : "#0f6b3f"};color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:6px;">
+                    ${inv.unlimitedDevices ? "Disable unlimited" : "Enable unlimited devices"}
+                </button>
             </td>
         </tr>
     `).join("") || `<tr><td colspan="7">No invoices yet.</td></tr>`;
@@ -258,6 +261,19 @@ async function loadInvoices() {
             const result = await apiPost(`/api/admin/licenses/${btn.dataset.id}/unbind-device`);
             if (result.status) { loadInvoices(); }
             else { alert(result.msg || "Failed to unbind device"); btn.disabled = false; }
+        });
+    });
+    document.querySelectorAll(".toggle-unlimited-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const enabling = btn.textContent.trim() === "Enable unlimited devices";
+            const msg = enabling
+                ? "Enable unlimited devices on this license? It'll be usable on any number of computers at once — intended for internal/warehouse use, not for a regular customer license."
+                : "Disable unlimited devices on this license? It'll go back to locking to a single device on next activation.";
+            if (!confirm(msg)) return;
+            btn.disabled = true;
+            const result = await apiPost(`/api/admin/licenses/${btn.dataset.id}/toggle-unlimited-devices`);
+            if (result.status) { loadInvoices(); }
+            else { alert(result.msg || "Failed to update"); btn.disabled = false; }
         });
     });
 }

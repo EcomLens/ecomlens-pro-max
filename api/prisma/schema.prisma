@@ -59,6 +59,13 @@ model License {
   createdAt          DateTime  @default(now())
   refundedAt         DateTime?
   refundReason       String?
+  // Admin-only escape hatch from the one-device-per-license rule above -
+  // for internal/business-owner use (e.g. running the desktop app across
+  // several warehouse computers under one account), not exposed to regular
+  // customers. A license with this set skips the device-binding check in
+  // /device-login entirely; boundDeviceId/boundAt become meaningless for it
+  // (left untouched, since there's no single "the" device to track anymore).
+  unlimitedDevices   Boolean   @default(false)
 }
 
 // Metadata only, logged by the web app after each recording - the video

@@ -95,6 +95,7 @@ router.get("/invoices", async (req, res) => {
             boundAt: l.boundAt,
             refundedAt: l.refundedAt,
             refundReason: l.refundReason,
+            unlimitedDevices: l.unlimitedDevices,
         })),
     });
 });
@@ -164,6 +165,22 @@ router.post("/licenses/:id/unbind-device", async (req, res) => {
         data: { boundDeviceId: null, boundAt: null },
     });
     return res.json({ status: true, data: updated });
+});
+// Toggles the admin-only "unlimited devices" escape hatch on a license -
+// intended for internal/business-owner use (e.g. the same account running
+// the desktop app across several warehouse computers at once), not for
+// regular customers. See the schema comment on License.unlimitedDevices and
+// the /device-login check in license.js for how this is enforced.
+router.post("/licenses/:id/toggle-unlimited-devices", async (req, res) => {
+    const license = await prisma.license.findUnique({ where: { id: req.params.id } });
+    if (!license) {
+        return res.status(404).json({ status: false, msg: "License not found" });
+    }
+    const updated = await prisma.license.update({
+        where: { id: license.id },
+        data: { unlimitedDevices: !license.unlimitedDevices },
+    });
+    return res.json({ status: true, data: { id: updated.id, unlimitedDevices: updated.unlimitedDevices } });
 });
 // Combined per-customer view across both revenue lines (desktop license +
 // web credits) - the single-pane view the separate /revenue/by-customer and
